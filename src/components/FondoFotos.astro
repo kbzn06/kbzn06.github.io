@@ -1,0 +1,115 @@
+---
+// Fotos que flotan de fondo: filas que se deslizan, más grandes en el centro.
+const {
+  imagenes = [
+    "/images/carreteweb/fto14.webp",
+    "/images/carreteweb/fto24.webp",
+    "/images/carreteweb/fto30.webp",
+    "/images/carreteweb/fto15.webp",
+    "/images/carreteweb/fto17.webp",
+    "/images/carreteweb/fto16.webp",
+    "/images/carreteweb/fto34.webp",
+    "/images/carreteweb/fto26.webp",
+    "/images/carreteweb/fto25.webp",
+    "/images/carreteweb/fto7.webp",
+    "/images/carreteweb/fto23.webp",
+    "/images/carreteweb/fto36.webp",
+
+  ],
+  filas = 5,
+  ancho = 150, // ancho de cada foto (px) en la fila central
+  alto = 190, // alto de cada foto (px) en la fila central
+  separacion = 14, // espacio entre fotos (px)
+  velocidad = 70, // segundos que tarda la fila central en dar una vuelta
+} = Astro.props;
+
+const mitad = (filas - 1) / 2;
+
+const filasDatos = Array.from({ length: filas }, (_, i) => {
+  // Cada fila empieza en una foto distinta para que no se vean alineadas
+  const desfase = i % imagenes.length;
+  const orden = [...imagenes.slice(desfase), ...imagenes.slice(0, desfase)];
+
+  // Más pequeñas cuanto más lejos del centro
+  const escala = Math.max(0.55, 1 - Math.abs(i - mitad) * 0.14);
+
+  // Fotos por tanda: las necesarias para cubrir una pantalla ancha (~2200 px)
+  const cantidad = Math.ceil(2200 / (ancho * escala + separacion));
+  const tanda = Array.from({ length: cantidad }, (_, k) => orden[k % orden.length]);
+
+  return { i, tanda, escala };
+});
+---
+
+<div
+  class="fondo"
+  aria-hidden="true"
+  style={`--ancho:${ancho}px; --alto:${alto}px; --sep:${separacion}px; --vel:${velocidad}s;`}
+>
+  {filasDatos.map((fila) => (
+    <div class="fila" style={`--i:${fila.i}; --escala:${fila.escala};`}>
+      <div class="pista">
+        {[0, 1].map(() =>
+          fila.tanda.map((src) => <img src={src} alt="" loading="lazy" decoding="async" />)
+        )}
+      </div>
+    </div>
+  ))}
+  <div class="velo"></div>
+</div>
+
+<style>
+  .fondo {
+    --f: 1;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    display: grid;
+    align-content: center;
+    gap: var(--sep);
+    overflow: hidden;
+    pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+  }
+  @media (max-width: 600px) {
+    .fondo { --f: 0.7; }
+  }
+
+  .pista {
+    display: flex;
+    width: max-content;
+    will-change: translate;
+    animation: deslizar calc(var(--vel) + var(--i) * 8s) linear infinite;
+  }
+  /* Las filas pares van en sentido contrario */
+  .fila:nth-child(even) .pista {
+    animation-direction: reverse;
+  }
+
+  .pista img {
+    flex: none;
+    width: calc(var(--ancho) * var(--escala) * var(--f));
+    height: calc(var(--alto) * var(--escala) * var(--f));
+    margin-right: var(--sep);
+    object-fit: cover;
+    border-radius: 14px;
+  }
+
+  .velo {
+    position: absolute;
+    inset: 0;
+    background: var(--degradado-amanecer);
+    opacity: var(--opacidad-fotos, 0.4);
+  }
+
+  /* La pista tiene dos tandas idénticas: al llegar a -50% vuelve al inicio sin salto */
+  @keyframes deslizar {
+    from { translate: 0 0; }
+    to { translate: -50% 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pista { animation: none; }
+  }
+</style>

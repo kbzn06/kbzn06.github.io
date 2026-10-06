@@ -1,0 +1,69 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Contador from "../components/contador.astro";
+import Calendario from "../components/calendario.astro";
+import VolverTulipan from "../components/VolverTulipan.astro";
+---
+
+<Layout titulo="12 días 🌷" protegida={true}>
+<main class="pantalla pantalla--dias">
+<div class="dias-fondo" aria-hidden="true">
+  <video autoplay muted loop playsinline>
+    <source src="/video/fondo.mp4" type="video/mp4" />
+  </video>
+  <div class="dias-fondo__velo"></div>
+</div>
+  <div class="dias-contenido">
+  <VolverTulipan destino="/hub" etiqueta="Volver al menú" />
+  <Contador />
+  <Calendario />
+</div>
+</main>
+</Layout>
+<style>
+.pantalla--dias {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.dias-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dias-fondo video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(var(--desenfoque-video));
+  scale: 1.1;
+}
+
+.dias-fondo__velo {
+  position: absolute;
+  inset: 0;
+  background: var(--degradado-amanecer);
+  opacity: var(--opacidad-velo);
+}
+
+.pantalla--dias > :not(.dias-fondo) {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dias-fondo video {
+    display: none;
+  }
+}
+.dias-contenido {
+  position: relative;
+  z-index: 1;
+}
+</style>

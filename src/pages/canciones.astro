@@ -1,0 +1,58 @@
+---
+import FondoFotos from "../components/FondoFotos.astro";
+import Layout from "../layouts/Layout.astro";
+import VolverTulipan from "../components/VolverTulipan.astro";
+---
+
+<Layout titulo="Canciones 🎵" protegida={true}>
+  <main class="pantalla pantalla--centro pantalla--fotos" style="--fondo: var(--fondo-canciones)">
+    <FondoFotos
+  imagenes={["/images/carreteweb/fto7.webp", "/images/carreteweb/fto14.webp", "/images/carreteweb/fto24.webp", "/images/carreteweb/fto30.webp", "/images/carreteweb/fto15.webp", "/images/carreteweb/fto17.webp", "/images/carreteweb/fto16.webp", "/images/carreteweb/fto34.webp", "/images/carreteweb/fto26.webp", "/images/carreteweb/fto25.webp"]}
+  filas={7}
+  ancho={130}
+  alto={170}
+  velocidad={90}
+/>
+<h1 class="titulo-pagina titulo-canciones">♡ Algunas de las canciones que me hacen pensar en ti ♡</h1>
+    <iframe
+      class="reproductor"
+      src="/reproductor/index.html"
+      title="Reproductor de música"
+    ></iframe>
+    <VolverTulipan destino="/hub" etiqueta="Volver al menú" />
+  </main>
+</Layout>
+
+<style>
+  .reproductor {
+    width: min(92vw, 380px, calc((100dvh - 11rem) * 0.6157));
+    aspect-ratio: 306 / 497;
+    border: 0;
+    background: transparent;
+     animation:
+    entrar 1.4s ease-out both,
+    flotar 6s ease-in-out 1.4s infinite;
+}
+.titulo-canciones {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 0.75rem;
+  font-family: "Rainy Hearts", sans-serif;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+
+}
+@keyframes entrar {
+  from { opacity: 0; scale: 0.94; }
+  to { opacity: 1; scale: 1; }
+}
+
+@keyframes flotar {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reproductor { animation: none; }
+}
+  
+</style>

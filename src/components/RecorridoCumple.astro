@@ -1,0 +1,490 @@
+---
+const { datos } = Astro.props;
+const regalos = datos.regalos ?? [];
+---
+
+<div class="recorrido" data-recorrido>
+  <section class="recorrido__pantalla" data-pantalla="inicio">
+    <p class="recorrido__sobrelinea">❤️‍🔥</p>
+    <h2 class="recorrido__titulo-final">And may the odds be ever in your favor.</h2>
+    <button type="button" class="recorrido__boton" data-ir="carta">
+      Que empiecen los juegos
+    </button>
+  </section>
+
+  <section class="recorrido__pantalla" data-pantalla="carta" hidden>
+    <h3 class="h3">Te gustan los acertijos? </h3>
+    <button
+      type="button"
+      class="recorrido__carta"
+      aria-label="Voltear la carta"
+      aria-pressed="false"
+      data-voltear-carta
+    >
+      <span class="recorrido__carta-interior">
+        <span class="recorrido__cara recorrido__frente">
+          {datos.carta?.frente}
+        </span>
+        <span class="recorrido__cara recorrido__reverso">
+          {datos.carta?.reverso}
+        </span>
+      </span>
+    </button>
+    <button type="button" class="recorrido__boton" data-ir="invitacion">
+      Continuar
+    </button>
+  </section>
+
+  <section class="recorrido__pantalla" data-pantalla="invitacion" hidden>
+    <h3 class="h3">+1 mensaje nuevo</h3>
+    <div class="recorrido__ticket">
+      <span class="recorrido__ticket-etiqueta">INVITACIÓN</span>
+      <p>{datos.invitacion || "CASITA."}</p>
+    </div>
+    <button type="button" class="recorrido__boton" data-ir="pista-dos">
+      Continuar
+    </button>
+  </section>
+
+  <section class="recorrido__pantalla" data-pantalla="pista-dos" hidden>
+    <h3 class="h3">Otra pista</h3>
+    <p class="recorrido__aviso">Intenta resolverla</p>
+    <p class="recorrido__texto">
+      {datos.pistaDos || "Añade aquí la segunda pista."}
+    </p>
+    <button type="button" class="recorrido__boton" data-ir="juego">
+      Continuar de todos modos
+    </button>
+  </section>
+
+  <section class="recorrido__pantalla" data-pantalla="juego" hidden>
+    <h3 class="h3">Regalos por descubrir</h3>
+    <p class="recorrido__progreso" data-progreso>1/{regalos.length}</p>
+
+    <div class="recorrido__regalos">
+      {regalos.map((regalo, indice) => (
+        <article
+          class="recorrido__regalo"
+          data-regalo={indice}
+          data-respuesta={regalo.respuesta}
+          hidden={indice !== 0}
+        >
+          <p class="recorrido__adivinanza">{regalo.adivinanza}</p>
+
+          <label class="recorrido__etiqueta" for={`respuesta-regalo-${indice}`}>
+            Tu respuesta
+          </label>
+          <input
+            id={`respuesta-regalo-${indice}`}
+            class="recorrido__entrada"
+            type="text"correcto
+            autocomplete="off"
+            data-entrada
+          />
+
+          <button type="button" class="recorrido__boton" data-comprobar>
+            Comprobar respuesta
+          </button>
+
+          <p class="recorrido__estado" aria-live="polite" data-estado></p>
+
+          <button
+            type="button"
+            class="recorrido__boton"
+            data-revelar-pista
+            hidden
+          >
+            Revelar pista
+          </button>
+
+          <div class="recorrido__pista-revelada" data-pista-revelada hidden>
+            <p class="recorrido__correcto">¡Correcto! Muy bien mi amor</p>
+            <p class="recorrido__pista">La pista es:</p>
+            <p class="recorrido__respuesta-mostrada" data-respuesta-mostrada></p>
+            <p class="recorrido__instrucciones">Puedes abrir el regalo de esta palabra.</p>
+          </div>
+
+          <nav class="recorrido__navegacion" aria-label="Navegar entre pistas">
+            <button
+              type="button"
+              class="recorrido__boton recorrido__boton--secundario"
+              data-anterior
+              disabled={indice === 0}
+            >
+              Anterior
+            </button>
+            <button
+              type="button"
+              class="recorrido__boton"
+              data-siguiente
+              hidden
+            >
+              Siguiente pista
+            </button>
+          </nav>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="recorrido__pantalla" data-pantalla="fin" hidden>
+    <h3 class="h3">Recorrido completado</h3>
+  </section>
+</div>
+
+<script>
+  function normalizar(texto) {
+    return texto
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLocaleLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  document.addEventListener("click", (evento) => {
+    const objetivo = evento.target instanceof Element ? evento.target : null;
+    if (!objetivo) return;
+
+    const recorrido = objetivo.closest("[data-recorrido]");
+    if (!recorrido) return;
+
+    const botonVoltear = objetivo.closest("[data-voltear-carta]");
+    if (botonVoltear) {
+      const volteada = botonVoltear.classList.toggle(
+        "recorrido__carta--volteada"
+      );
+      botonVoltear.setAttribute("aria-pressed", String(volteada));
+      return;
+    }
+
+    const botonIr = objetivo.closest("[data-ir]");
+    if (botonIr) {
+      const destino = botonIr.dataset.ir;
+
+      recorrido.querySelectorAll("[data-pantalla]").forEach((pantalla) => {
+        pantalla.hidden = pantalla.dataset.pantalla !== destino;
+      });
+
+      return;
+    }
+
+    const tarjeta = objetivo.closest("[data-regalo]");
+    if (!tarjeta) return;
+
+    if (objetivo.closest("[data-comprobar]")) {
+      const entrada = tarjeta.querySelector("[data-entrada]");
+      const estado = tarjeta.querySelector("[data-estado]");
+      const botonRevelar = tarjeta.querySelector("[data-revelar-pista]");
+      const respuestaEsperada = normalizar(tarjeta.dataset.respuesta ?? "");
+
+      if (!entrada || !estado || !botonRevelar) return;
+
+      if (!respuestaEsperada) {
+        estado.textContent = "Falta configurar la respuesta de esta pista.";
+        return;
+      }
+
+      if (normalizar(entrada.value) === respuestaEsperada) {
+        estado.textContent = "";
+        tarjeta.dataset.correcta = "true";
+        botonRevelar.hidden = false;
+      } else {
+        estado.textContent = "Esa respuesta no coincide. Intenta otra vez.";
+        tarjeta.dataset.correcta = "false";
+        botonRevelar.hidden = true;
+      }
+
+      return;
+    }
+
+    if (objetivo.closest("[data-revelar-pista]")) {
+      if (tarjeta.dataset.correcta !== "true") return;
+
+      const pistaRevelada = tarjeta.querySelector("[data-pista-revelada]");
+      const textoRespuesta = tarjeta.querySelector("[data-respuesta-mostrada]");
+      const botonSiguiente = tarjeta.querySelector("[data-siguiente]");
+
+      if (!pistaRevelada || !textoRespuesta || !botonSiguiente) return;
+
+      textoRespuesta.textContent = tarjeta.dataset.respuesta;
+      pistaRevelada.hidden = false;
+      botonSiguiente.hidden = false;
+      tarjeta.dataset.pistaMostrada = "true";
+      return;
+    }
+
+    const tarjetas = Array.from(
+      recorrido.querySelectorAll("[data-regalo]")
+    );
+    const indiceActual = tarjetas.indexOf(tarjeta);
+    const progreso = recorrido.querySelector("[data-progreso]");
+
+    if (objetivo.closest("[data-anterior]")) {
+      const nuevoIndice = Math.max(0, indiceActual - 1);
+      mostrarTarjeta(tarjetas, nuevoIndice, progreso);
+      return;
+    }
+
+    if (objetivo.closest("[data-siguiente]")) {
+      if (tarjeta.dataset.pistaMostrada !== "true") return;
+
+      const nuevoIndice = indiceActual + 1;
+
+      if (nuevoIndice >= tarjetas.length) {
+        recorrido.querySelectorAll("[data-pantalla]").forEach((pantalla) => {
+          pantalla.hidden = pantalla.dataset.pantalla !== "fin";
+        });
+        return;
+      }
+
+      mostrarTarjeta(tarjetas, nuevoIndice, progreso);
+    }
+  });
+
+  function mostrarTarjeta(tarjetas, indice, progreso) {
+    tarjetas.forEach((tarjeta, posicion) => {
+      tarjeta.hidden = posicion !== indice;
+    });
+
+    if (progreso) {
+      progreso.textContent = `${indice + 1}/${tarjetas.length}`;
+    }
+  }
+</script>
+
+<style>
+  .recorrido {
+    width: min(100%, 520px);
+    margin: 0 auto;
+    color: var(--color-texto);
+  }
+
+  .recorrido__pantalla {
+    animation: recorrido-entrada 320ms ease-out both;
+  }
+
+  .recorrido__sobrelinea,
+  .recorrido__ticket-etiqueta {
+    font-family: "Bank Gothic", sans-serif;
+    letter-spacing: 0.08em;
+    font-size: 1.25rem;
+  }
+
+  .recorrido__texto,
+  .recorrido__aviso,
+  .recorrido__adivinanza {
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+
+  .recorrido__aviso {
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--color-brillo);
+    background: rgb(255 255 255 / 0.45);
+    font-size: 0.95rem;
+  }
+
+  .recorrido__ticket {
+    position: relative;
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    border: 2px dashed #84613f;
+    background: var(--color-cielo);
+    line-height: 1.6;
+  }
+
+  .recorrido__ticket-etiqueta {
+    display: block;
+    text-align: center;
+  }
+
+  .recorrido__carta {
+    display: block;
+    width: min(100%, 280px);
+    margin: 1rem auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    perspective: 900px;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+  }
+
+  .recorrido__carta-interior {
+    display: grid;
+    transform-style: preserve-3d;
+    transition: transform 650ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  }
+
+  .recorrido__carta--volteada .recorrido__carta-interior {
+    transform: rotateY(180deg);
+  }
+
+  .recorrido__cara {
+    grid-area: 1 / 1;
+    display: grid;
+    place-content: center;
+    min-height: 150px;
+    padding: 1.25rem;
+    backface-visibility: hidden;
+    white-space: pre-line;
+  }
+
+  .recorrido__frente {
+    background: var(--color-cielo);
+    font-family: "Bank Gothic", sans-serif;
+  }
+
+  .recorrido__reverso {
+    background: #fffdf8;
+    transform: rotateY(180deg);
+  }
+
+  .recorrido__progreso {
+    font-family: "Bank Gothic", sans-serif;
+  }
+
+  .recorrido__regalo {
+    padding: 1.25rem;
+    border: 1px solid rgb(0 0 0 / 0.12);
+    background: rgb(255 255 255 / 0.4);
+    animation: recorrido-entrada 320ms ease-out both;
+  }
+
+  .recorrido__entrada {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    margin: 0.5rem 0 1rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid rgb(0 0 0 / 0.3);
+    background: #fffdf8;
+    color: var(--color-texto);
+    font: inherit;
+  }
+  .h3 {
+    font-family: "Bank Gothic", sans-serif;
+  }
+
+  .recorrido__etiqueta {
+    display: block;
+    text-align: left;
+  }
+
+  .recorrido__estado {
+    min-height: 1.5em;
+    line-height: 1.5;
+  }
+
+  .recorrido__pista-revelada {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--color-cielo);
+    animation: recorrido-correcto 500ms ease-out both;
+  }
+
+  .recorrido__correcto {
+    font-family: "Rainy Hearts", cursive;
+  }
+
+  .recorrido__respuesta-mostrada {
+    font-family: "Bank Gothic", sans-serif;
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+
+  .recorrido__navegacion {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+  .recorrido__instrucciones {
+
+    font-family: "Rainy Hearts", cursive;
+  }
+.recorrido__pista {
+
+    font-family: "Rainy Hearts", cursive;
+}
+.recorrido__boton {
+  min-height: 46px;
+  font-family: "Bank Gothic", sans-serif;
+  margin-top: 0.75rem;
+  padding: 0.7rem 1.25rem;
+  border: 1px solid rgb(132 97 63 / 0.35);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-cielo), #fff0df);
+  color: var(--color-texto);
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgb(63 64 56 / 0.15);
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.recorrido__boton:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 15px rgb(63 64 56 / 0.2);
+  filter: brightness(1.03);
+}
+
+.recorrido__boton:not(:disabled):active {
+  transform: translateY(0);
+}
+
+.recorrido__boton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.recorrido__boton:focus-visible {
+  outline: 3px solid var(--color-brillo);
+  outline-offset: 3px;
+}
+  @keyframes recorrido-entrada {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes recorrido-correcto {
+    0% { opacity: 0; transform: scale(0.92); }
+    70% { opacity: 1; transform: scale(1.04); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @media (max-width: 480px) {
+    .recorrido__regalo {
+      padding: 0.85rem;
+    }
+
+    .recorrido__navegacion {
+      flex-direction: column;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .recorrido__pantalla,
+    .recorrido__regalo,
+    .recorrido__pista-revelada {
+      animation: none;
+    }
+
+    .recorrido__carta-interior {
+      transition: none;
+    }
+  }
+  .recorrido__titulo-final {
+  font-family: "Rainy Hearts", cursive;
+  font-size: clamp(1.8rem, 6vw, 2.8rem);
+  font-weight: normal;
+  line-height: 1.2;
+}
+</style>

@@ -1,0 +1,859 @@
+---
+import { dias } from "../data/dias.js";
+import { FECHA_FINAL, TOTAL_DIAS } from "../data/config.js";
+import RecorridoCumple from "./RecorridoCumple.astro";
+// Convierte el formato antiguo (tipo + campos) en una lista de bloques
+function bloquesDe(dia) {
+  if (Array.isArray(dia.bloques)) return dia.bloques;
+  const lista = [];
+  if (dia.tipo) lista.push({ ...dia });
+  if (dia.audio) lista.push({ tipo: "audio", archivo: dia.audio });
+  return lista;
+}
+function fechaDesbloqueo(numero: number) {
+  const fecha = new Date(FECHA_FINAL);
+  fecha.setDate(fecha.getDate() - (TOTAL_DIAS - numero));
+  return fecha.toISOString();
+}
+const stickers = [
+  { src: "/images/deco/gift.webp", clase: "calendario__sticker--capi" },
+  { src: "/images/deco/dentista.png", clase: "calendario__sticker--dentista" },
+];
+---
+
+<section class="calendario" id="dias">
+  <h2>Doce días</h2>
+  <div class="calendario__stickers" aria-hidden="true">
+  {stickers.map((sticker) => (
+    <img
+      class={`calendario__sticker ${sticker.clase}`}
+      src={sticker.src}
+      alt=""
+      loading="lazy"
+      decoding="async"
+    />
+  ))}
+</div>
+
+  <div class="calendario__rejilla">
+    {dias.map((dia) => (
+      <button
+        type="button"
+        class="dia dia--bloqueado"
+        data-numero={dia.numero}
+        data-desbloqueo={fechaDesbloqueo(dia.numero)}
+        aria-label={`Día ${dia.numero}`}
+      >
+        <img
+          class="dia__imagen"
+          src={`/images/dias/dia${dia.numero}.webp`}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+        />
+        <span class="dia__fecha"></span>
+      </button>
+    ))}
+  </div>
+
+{dias.map((dia) => (
+  <template id={`sorpresa-${dia.numero}`}>
+    <h3>{dia.titulo}</h3>
+    {bloquesDe(dia).map((b) => (
+      <section class={`bloque bloque--${b.tipo}`}>
+        {b.tipo === "mensaje" && <p class="sorpresa__texto">{b.contenido}</p>}
+
+        {b.tipo === "foto" && (
+          <img src={b.contenido} alt={b.alt ?? dia.titulo} loading="lazy" />
+        )}
+       {b.tipo === "recorrido-cumple" && (
+  <RecorridoCumple datos={b.datos} />
+)}
+{b.tipo === "carta-imagen" && (
+ <button
+  type="button"
+  class="carta carta--imagen"
+  aria-label="Voltear la carta para revelar una imagen"
+  aria-pressed="false"
+>
+    <span class="carta__interior">
+      <span class="carta__cara carta__frente">
+        <span class="carta__contenido carta__contenido--frente">
+          {b.frente}
+        </span>
+      </span>
+
+      <span class="carta__cara carta__reverso carta__reverso--imagen">
+        <img
+          class="carta__imagen"
+          src={b.imagen}
+          alt={b.alt ?? "Imagen revelada"}
+          loading="lazy"
+          decoding="async"
+        />
+      </span>
+    </span>
+  </button>
+)}
+  {b.tipo === "carta" && (
+  <button type="button" class="carta" aria-pressed="false">
+    <span class="carta__interior">
+      <span class="carta__cara carta__frente">
+        <span class="carta__contenido carta__contenido--frente">
+          {b.frente}
+        </span>
+      </span>
+
+      <span class="carta__cara carta__reverso">
+        <span class="carta__contenido carta__contenido--reverso">
+          {b.reverso}
+        </span>
+      </span>
+    </span>
+  </button>
+)}
+    {b.tipo === "ticket" && (
+  <div class="ticket">
+    <p class="ticket__revelado ticket__contenido">{b.contenido}</p>
+
+    <div class="ticket__mitad ticket__mitad--izq" aria-hidden="true">
+      <span>{b.frente}</span>
+    </div>
+
+    <div class="ticket__mitad ticket__mitad--der" aria-hidden="true">
+      <span>{b.frente}</span>
+    </div>
+
+    <button
+      type="button"
+      class="ticket__rasgar"
+      aria-label="Rasgar el boleto"
+    ></button>
+  </div>
+)}
+        {b.tipo === "audio" && (
+          <>
+            {b.titulo && <p class="bloque__etiqueta">♪ {b.titulo}</p>}
+            <audio class="sorpresa__audio" controls preload="none" src={b.archivo}></audio>
+          </>
+        )}
+      </section>
+    ))}
+  </template>
+))}
+
+  <dialog class="sorpresa" aria-label="Sorpresa del día">
+    <div class="sorpresa__papel">
+      <div class="sorpresa__cuerpo"></div>
+      <button type="button" class="sorpresa__cerrar">Cerrar</button>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  import { ahora } from "../scripts/tiempo.js";
+
+  const GUARDADO = "our13-abiertos";
+  const botones = document.querySelectorAll<HTMLButtonElement>(".dia");
+  const dialogo = document.querySelector<HTMLDialogElement>(".sorpresa")!;
+  const cuerpo = dialogo.querySelector<HTMLDivElement>(".sorpresa__cuerpo")!;
+
+  function leerAbiertos(): number[] {
+    try {
+      const guardados = JSON.parse(localStorage.getItem(GUARDADO) ?? "[]");
+      return Array.isArray(guardados)
+        ? guardados.map(Number).filter(Number.isFinite)
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function guardarAbierto(numero: number) {
+    const abiertos = leerAbiertos();
+
+    if (!abiertos.includes(numero)) {
+      try {
+        localStorage.setItem(
+          GUARDADO,
+          JSON.stringify([...abiertos, numero])
+        );
+      } catch {
+        // El calendario todavía puede abrir la sorpresa si el almacenamiento está bloqueado.
+      }
+    }
+  }
+
+  function actualizar(primeraVez = false) {
+    const hoy = ahora();
+    const abiertos = leerAbiertos();
+
+    botones.forEach((boton) => {
+      const fechaAttr = boton.dataset.desbloqueo;
+      const numero = Number(boton.dataset.numero);
+
+      if (!fechaAttr) return;
+
+      const desbloqueado = hoy >= new Date(fechaAttr);
+      const estabaBloqueado = boton.classList.contains("dia--bloqueado");
+      const esNuevo = desbloqueado && !abiertos.includes(numero);
+
+      boton.classList.toggle("dia--bloqueado", !desbloqueado);
+      boton.classList.toggle("dia--nuevo", esNuevo);
+
+      if (desbloqueado && estabaBloqueado && !primeraVez) {
+        boton.classList.add("dia--estallido");
+      }
+    });
+  }
+
+  botones.forEach((boton) => {
+    const elementoFecha = boton.querySelector<HTMLElement>(".dia__fecha");
+    const fechaAttr = boton.dataset.desbloqueo;
+
+    if (elementoFecha && fechaAttr) {
+      elementoFecha.textContent = new Date(fechaAttr).toLocaleDateString(
+        "es",
+        {
+          day: "numeric",
+          month: "short",
+        }
+      );
+    }
+
+    boton.addEventListener("click", () => {
+      if (boton.classList.contains("dia--bloqueado")) {
+        boton.classList.add("dia--sacudida");
+        boton.addEventListener(
+          "animationend",
+          () => boton.classList.remove("dia--sacudida"),
+          { once: true }
+        );
+        return;
+      }
+
+      const numero = Number(boton.dataset.numero);
+      const plantilla = document.querySelector<HTMLTemplateElement>(
+        `#sorpresa-${numero}`
+      );
+
+      if (!plantilla) return;
+
+      cuerpo.replaceChildren(plantilla.content.cloneNode(true));
+      dialogo.showModal();
+      guardarAbierto(numero);
+      actualizar();
+    });
+  });
+
+  dialogo
+    .querySelector<HTMLButtonElement>(".sorpresa__cerrar")
+    ?.addEventListener("click", () => dialogo.close());
+
+  dialogo.addEventListener("click", (evento) => {
+    if (evento.target === dialogo) dialogo.close();
+  });
+// Si un día tiene varias canciones, solo suena una a la vez
+cuerpo.addEventListener(
+  "play",
+  (e) => {
+    cuerpo.querySelectorAll("audio").forEach((a) => {
+      if (a !== e.target) a.pause();
+    });
+  },
+  true
+);
+cuerpo.addEventListener("click", (evento) => {
+  const objetivo = evento.target as HTMLElement;
+
+  const botonRasgar =
+    objetivo.closest<HTMLButtonElement>(".ticket__rasgar");
+
+  if (botonRasgar) {
+    botonRasgar
+      .closest<HTMLElement>(".ticket")
+      ?.classList.add("ticket--rasgado");
+
+    botonRasgar.hidden = true;
+    return;
+  }
+
+  const carta = objetivo.closest<HTMLButtonElement>(".carta");
+  if (!carta) return;
+
+  const volteada = carta.classList.toggle("carta--volteada");
+  carta.setAttribute("aria-pressed", String(volteada));
+});
+
+  dialogo.addEventListener("close", () => {
+    cuerpo.replaceChildren();
+  });
+
+  actualizar(true);
+  setInterval(() => actualizar(), 30_000);
+</script>
+
+<style>
+  /* ─── Variables locales: cambia aquí el "papel" de las cartas ─── */
+  .calendario {
+    --papel: #fffdf8;
+    --papel-sombra: #f1e3c8;
+    --linea-papel: #b88d62;
+    --tinta: var(--color-texto);
+
+    position: relative;
+    padding: 4rem 6vw 5rem;
+    color: var(--color-texto);
+    text-align: center;
+  }
+
+  .calendario h2 {
+    margin: 0;
+    font-family: "Bank Gothic", sans-serif;
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    letter-spacing: 0.06em;
+  }
+
+  .calendario h2::after {
+    content: "✦";
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    opacity: 0.55;
+  }
+
+  /* ─── Rejilla de días ─── */
+  .calendario__rejilla {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    align-items: start;
+    gap: clamp(1rem, 3vw, 2rem);
+    max-width: 1000px;
+    margin: 2rem auto 0;
+  }
+
+  .dia {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.25s ease, filter 0.3s, opacity 0.3s;
+  }
+
+  .dia:not(.dia--bloqueado):hover {
+    transform: translateY(-6px) scale(1.04);
+  }
+
+  .dia:not(.dia--bloqueado):active {
+    transform: scale(0.95);
+    transition-duration: 0.08s;
+  }
+
+  .dia:focus-visible {
+    outline: 2px dashed currentColor;
+    outline-offset: 6px;
+  }
+
+  .dia__imagen {
+    display: block;
+    width: min(100%, 210px);
+    height: clamp(150px, 38vw, 210px);
+    object-fit: contain;
+    object-position: center;
+    filter: drop-shadow(0 8px 12px rgb(63 64 56 / 0.18));
+    transition: filter 0.3s;
+  }
+
+  .dia:not(.dia--bloqueado):hover .dia__imagen {
+    filter: drop-shadow(0 14px 18px rgb(63 64 56 / 0.28));
+  }
+
+  .dia__fecha {
+    font-family: "Rainy Hearts", cursive;
+    font-size: 1.05rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    opacity: 0.8;
+  }
+
+  /* Bloqueado: apagado y con candado */
+  .dia--bloqueado {
+    filter: grayscale(0.65);
+    opacity: 0.58;
+    cursor: not-allowed;
+  }
+
+  .dia--bloqueado::after {
+    content: "🔒";
+    position: absolute;
+    top: 6%;
+    right: 14%;
+    font-size: 1.15rem;
+    filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
+  }
+
+  /* Desbloqueado y sin abrir: brillo suave */
+  .dia--nuevo .dia__imagen {
+    animation: brillo 2.4s ease-in-out infinite;
+  }
+
+  .dia--estallido {
+    animation: estallido 0.9s ease-out;
+  }
+
+  .dia--sacudida {
+    animation: sacudida 0.4s;
+  }
+
+  /* ─── Stickers ─── */
+  .calendario__stickers {
+    pointer-events: none;
+  }
+
+  .calendario__sticker {
+    position: absolute;
+    z-index: 0;
+    width: clamp(48px, 10vw, 110px);
+    height: auto;
+    pointer-events: none;
+    animation: deriva 7s ease-in-out infinite;
+  }
+
+  .calendario__sticker--capi {
+    top: 5rem;
+    left: 2vw;
+  }
+
+  .calendario__sticker--capixel {
+    top: 5rem;
+    right: 3vw;
+    animation-delay: -2.5s;
+  }
+
+  .calendario__sticker--dentista {
+    right: 4vw;
+    bottom: 1rem;
+    animation-delay: -5s;
+  }
+
+  /* ─── La carta (diálogo) ─── */
+  .sorpresa {
+    position: relative;
+    box-sizing: border-box;
+    width: min(92vw, 580px);
+    max-width: none;
+    max-height: 88dvh;
+    overflow-y: auto;
+    padding: 2rem 1.75rem 1.75rem;
+    border: 2px solid var(--linea-papel);
+    border-radius: 0;
+    background:
+      radial-gradient(120% 80% at 15% 0%, #fffffb 0%, transparent 60%),
+      linear-gradient(170deg, var(--papel) 0%, var(--papel-sombra) 100%);
+    color: var(--tinta);
+    box-shadow: 0 28px 60px rgb(0 0 0 / 0.4);
+    /* Marco interior fino: un "doble borde" de papelería que no se mueve al hacer scroll */
+    outline: 1px solid rgb(184 141 98 / 0.55);
+    outline-offset: -10px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--linea-papel) transparent;
+  }
+
+  .sorpresa[open] {
+    animation: carta-entra 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .sorpresa::backdrop {
+    background: rgb(40 35 50 / 0.62);
+    backdrop-filter: blur(4px);
+  }
+
+  .sorpresa[open]::backdrop {
+    animation: velo-entra 0.5s ease both;
+  }
+
+  .sorpresa__cuerpo {
+    min-height: 220px;
+    line-height: 1.7;
+  }
+
+  .sorpresa__cuerpo h3 {
+    margin: 0 0 1.5rem;
+    font-family: "Bank Gothic", sans-serif;
+    font-size: clamp(1.35rem, 5vw, 1.9rem);
+    letter-spacing: 0.04em;
+  }
+
+  .sorpresa__cuerpo h3::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 1px;
+    margin: 0.6rem auto 0;
+    background: var(--linea-papel);
+  }
+
+  /* ─── Bloques combinados ─── */
+  .bloque + .bloque {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed rgb(184 141 98 / 0.55);
+  }
+
+  .bloque__etiqueta {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .sorpresa__texto {
+    margin: 0;
+    white-space: pre-line;
+    line-height: 1.75;
+  }
+
+  .bloque--foto img {
+    display: block;
+    box-sizing: border-box;
+    max-width: 100%;
+    max-height: 48dvh;
+    margin: 0 auto;
+    padding: 0.5rem;
+    background: #fff;
+    box-shadow: 0 8px 20px rgb(63 64 56 / 0.22);
+    object-fit: contain;
+    rotate: -1deg;
+  }
+
+  .sorpresa__audio {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  /* ─── Botón cerrar ─── */
+  .sorpresa__cerrar {
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.25rem;
+  border: 1px solid rgb(132 97 63 / 0.35);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-cielo), #fff0df);
+  color: var(--color-texto);
+  font-family: "Rainy Hearts", cursive;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgb(63 64 56 / 0.15);
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.sorpresa__cerrar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 15px rgb(63 64 56 / 0.2);
+}
+
+.sorpresa__cerrar:focus-visible {
+  outline: 3px solid var(--color-brillo);
+  outline-offset: 3px;
+}
+  /* ─── Carta que se voltea ─── */
+  .carta {
+    display: block;
+    width: min(100%, 240px);
+    aspect-ratio: 4 / 5;
+    margin: 0.75rem auto 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    perspective: 1000px;
+  }
+
+  .carta__interior {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+  }
+
+  .carta--volteada .carta__interior {
+    transform: rotateY(180deg);
+  }
+
+  .carta__cara {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    border: 1px solid rgb(120 97 73 / 0.45);
+    border-radius: 0;
+    box-shadow: 0 8px 24px rgb(63 64 56 / 0.2);
+    outline: 1px solid rgb(120 97 73 / 0.3);
+    outline-offset: -9px;
+    line-height: 1.5;
+    white-space: pre-line;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .carta__frente {
+    background: linear-gradient(160deg, var(--color-cielo), #fff3dc);
+    font-family: "Rainy Hearts", sans-serif;
+  }
+
+  .carta__reverso {
+    transform: rotateY(180deg);
+    background: var(--papel);
+    font-family: "Rainy Hearts", sans-serif;
+  }
+
+  /* ─── Boleto que se rasga ─── */
+  .ticket {
+    position: relative;
+    display: grid;
+    width: min(100%, 300px);
+    min-height: 130px;
+    margin: 1rem auto 0;
+    /* La sombra va aquí (no en las mitades) porque clip-path la recortaría */
+    filter: drop-shadow(0 6px 10px rgb(63 64 56 / 0.22));
+  }
+
+  .ticket__revelado {
+    display: grid;
+    place-content: center;
+    margin: 0;
+    padding: 1.25rem;
+    text-align: center;
+    line-height: 1.6;
+    white-space: pre-line;
+    opacity: 0;
+    scale: 0.95;
+    transition: opacity 0.6s ease 0.25s, scale 0.6s ease 0.25s;
+  }
+
+  .ticket--rasgado .ticket__revelado {
+    opacity: 1;
+    scale: 1;
+  }
+
+  .ticket__mitad {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    box-sizing: border-box;
+    padding: 1rem;
+    border: 2px solid #84613f;
+    border-radius: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: "Bank Gothic", sans-serif;
+    letter-spacing: 0.1rem;
+    text-align: center;
+    white-space: pre-line;
+    transition:
+      translate 0.9s cubic-bezier(0.3, 0.1, 0.2, 1),
+      rotate 0.9s ease,
+      opacity 0.9s ease;
+  }
+
+  .ticket__mitad--izq {
+    transform-origin: 0 100%;
+    clip-path: polygon(
+      0 0, 66% 0, 64% 12%, 67% 24%, 64% 36%, 67% 48%,
+      64% 60%, 67% 72%, 64% 84%, 66% 100%, 0 100%
+    );
+  }
+
+  .ticket__mitad--der {
+    transform-origin: 100% 100%;
+    clip-path: polygon(
+      66% 0, 100% 0, 100% 100%, 66% 100%, 64% 84%, 67% 72%,
+      64% 60%, 67% 48%, 64% 36%, 67% 24%, 64% 12%
+    );
+  }
+
+  .ticket::after {
+    content: "";
+    position: absolute;
+    top: 8%;
+    bottom: 8%;
+    left: 66%;
+    border-left: 2px dashed rgb(0 0 0 / 0.3);
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .ticket--rasgado::after {
+    opacity: 0;
+  }
+
+  .ticket__rasgar {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ticket__rasgar[hidden] {
+    display: none;
+  }
+
+  .ticket__rasgar:focus-visible {
+    outline: 2px dashed var(--tinta);
+    outline-offset: 4px;
+  }
+
+  .ticket:not(.ticket--rasgado):hover .ticket__mitad--der {
+    translate: 6px 0;
+    rotate: 2deg;
+  }
+
+  .ticket--rasgado .ticket__mitad--izq {
+    translate: -34px 18px;
+    rotate: -8deg;
+    opacity: 0;
+  }
+.ticket__contenido {
+  white-space: pre-line;
+  line-height: 1.5;
+  font-size: 1.1rem;
+  font-family: "Rainy Hearts", cursive;
+  text-align: center;
+}
+  .ticket--rasgado .ticket__mitad--der {
+    translate: 48px 30px;
+    rotate: 14deg;
+    opacity: 0;
+  }
+
+  /* ─── Animaciones ─── */
+  @keyframes brillo {
+    0%, 100% {
+      filter:
+        drop-shadow(0 6px 8px rgb(63 64 56 / 0.18))
+        drop-shadow(0 0 0 transparent);
+    }
+    50% {
+      filter:
+        drop-shadow(0 6px 8px rgb(63 64 56 / 0.18))
+        drop-shadow(0 0 16px var(--color-brillo));
+    }
+  }
+
+  @keyframes estallido {
+    0% { transform: scale(0.8) rotate(-6deg); }
+    50% { transform: scale(1.12) rotate(3deg); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes sacudida {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  @keyframes deriva {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -10px; }
+  }
+
+  @keyframes carta-entra {
+    from { opacity: 0; translate: 0 48px; rotate: -2deg; scale: 0.94; }
+    to { opacity: 1; translate: 0 0; rotate: 0deg; scale: 1; }
+  }
+
+  @keyframes velo-entra {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ─── Móvil ─── */
+  @media (max-width: 480px) {
+    .calendario__rejilla {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem 0.75rem;
+    }
+
+    .dia__imagen {
+      width: 100%;
+    }
+
+    .calendario__sticker {
+      width: clamp(42px, 12vw, 64px);
+    }
+
+    .sorpresa {
+      padding: 1.75rem 1.25rem 1.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dia,
+    .dia *,
+    .calendario__sticker,
+    .sorpresa[open],
+    .sorpresa[open]::backdrop,
+    .carta__interior,
+    .ticket__mitad,
+    .ticket__revelado {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+  .carta__contenido {
+  display: block;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* Texto de la cara frontal */
+.carta__contenido--frente {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Texto de la cara posterior */
+.carta__contenido--reverso {
+  font-size: 1rem;
+  font-family: "Rainy Hearts", cursive;
+}
+.carta__reverso--imagen {
+  overflow: hidden;
+  padding: 0.5rem;
+}
+.carta__imagen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+.carta--imagen {
+  width: min(90vw, 360px);
+}
+
+.carta--imagen .carta__imagen {
+  max-height: 70vh;
+}
+</style>

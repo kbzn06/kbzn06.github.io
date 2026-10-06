@@ -1,0 +1,66 @@
+---
+import { FECHA_FINAL } from '../data/config.js';
+---
+
+<div class="contador" data-meta={FECHA_FINAL}>
+	
+  <div class="contador__bloque"> <span data-unidad="dias">--</span><small>dias</small></div>
+  <div class="contador__bloque"> <span data-unidad="horas">--</span><small>horas</small></div>
+  <div class="contador__bloque"> <span data-unidad="minutos">--</span><small>min</small></div>
+  <div class="contador__bloque"> <span data-unidad="segundos">--</span><small>seg</small></div>
+  </div>
+
+  <script>
+	import { ahora } from '../scripts/tiempo.js';
+
+	const contador = document.querySelector<HTMLElement>(".contador");
+
+	if (contador){
+	const metaAttr = contador.dataset.meta;
+	const meta = metaAttr ? new Date(metaAttr) : new Date();
+
+	function mostrar(unidad: string, valor: number) {
+		const el = contador?.querySelector(`[data-unidad="${unidad}"]`);
+		if (el) {
+			el.textContent = String(valor).padStart(2, '0');
+		}
+	}
+	function actualizar() {
+		const fechaActual = ahora();
+		const tiempoActual = fechaActual instanceof Date ? fechaActual.getTime() : new Date(fechaActual).getTime();
+    const resta = Math.max(0, meta.getTime() - tiempoActual);
+    mostrar("dias", Math.floor(resta / 86_400_000));
+    mostrar("horas", Math.floor(resta / 3_600_000) % 24);
+    mostrar("minutos", Math.floor(resta / 60_000) % 60);
+    mostrar("segundos", Math.floor(resta / 1000) % 60);
+  }
+
+  actualizar();
+  setInterval(actualizar, 1000);
+}
+</script>	
+
+<style>
+  .contador {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    font-family: "Rainy Hearts", sans-serif;
+  }
+  .contador__bloque {
+    display: grid;
+    justify-items: center;
+    min-width: 3.5rem;
+  }
+  .contador__bloque span {
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-texto);
+  }
+  .contador__bloque small {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+</style>

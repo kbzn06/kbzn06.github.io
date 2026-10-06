@@ -1,0 +1,119 @@
+:root {
+  --color-fondo-amanecer: #b2f8ae;
+  --color-fondo-naturaleza: #d9e5d0;
+  --color-texto: #000000;
+  --color-cielo: #c2eaf8;
+  --color-brillo: #fff1da;
+  --fondo-1: #1c2622;
+--fondo-2: #2b3330;
+--fondo-3: #44363f;
+--degradado-amanecer: linear-gradient(
+  180deg,
+  var(--fondo-1) 0%,
+  var(--fondo-2) 50%,
+  var(--fondo-3) 100%
+);
+--color-texto-claro: #f4ece1;
+--duracion-transicion: 1.4s;
+--desenfoque-video: 2px;
+--opacidad-velo: 0.55;
+--fondo-hub: url("/images/fondos/fondo-hub.jpg") center / cover no-repeat;
+--fondo-carrete: url("/images/fondos/fondo-carrete.jpg") center / cover no-repeat;
+--fondo-dias: var(--degradado-amanecer);
+--fondo-canciones: var(--degradado-amanecer);
+}
+
+
+@font-face {
+  font-family: "Bank Gothic";
+  src: url("/fonts/bank-gothic-bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}	
+@font-face {
+  font-family: "Rainy Hearts";
+  src: url("/fonts/rainyhearts.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--color-fondo-naturaleza);
+  color: var(--color-texto);
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: var(--duracion-transicion) ease-in-out both fade-out;
+}
+::view-transition-new(root) {
+  animation: var(--duracion-transicion) ease-in-out both fade-in;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.pantalla {
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: 4rem 1.5rem 5.5rem;
+  background:
+    linear-gradient(
+      rgb(var(--velo-color, 255 255 255) / var(--velo, 0)),
+      rgb(var(--velo-color, 255 255 255) / var(--velo, 0))
+    ),
+    var(--fondo, var(--degradado-amanecer));
+  color: var(--color-texto-claro);
+}
+.pantalla--centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-block: 5.5rem;
+}
+.pantalla--fotos {
+  isolation: isolate;
+}
+.titulo-pagina {
+  animation: titulo-entrada 700ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  font-family: "Rainy Hearts", sans-serif;
+}
+
+@keyframes titulo-entrada {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+    scale: 0.98;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .titulo-pagina {
+    animation: none;
+  }
+}

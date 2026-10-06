@@ -1,0 +1,38 @@
+---
+const { destino = "/hub", etiqueta = "Volver" } = Astro.props;
+---
+
+<a href={destino} class="volver-tulipan" aria-label={etiqueta}>
+  <img src="/images/deco/tulip.png" alt="" />
+</a>
+
+<style>
+  .volver-tulipan {
+    position: fixed;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    translate: -50% 0;
+    z-index: 10;
+    display: block;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.25s ease;
+  }
+  .volver-tulipan img {
+    display: block;
+    width: clamp(34px, 8vw, 48px);
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgb(63 64 56 / 0.3));
+  }
+  .volver-tulipan:hover {
+    transform: translateY(-4px) scale(1.12);
+  }
+  .volver-tulipan:active {
+    transform: scale(0.9);
+    transition-duration: 0.08s;
+  }
+  .volver-tulipan:focus-visible {
+    outline: 2px dashed var(--color-texto);
+    outline-offset: 6px;
+    border-radius: 50%;
+  }
+</style>

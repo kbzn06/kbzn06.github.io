@@ -1,0 +1,42 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Carrete from "../components/Carrete.astro";
+import VolverTulipan from "../components/VolverTulipan.astro";
+import FondoFotos from "../components/FondoFotos.astro";
+
+const imagenesFondo = [
+  "/images/carreteweb/fto23.webp",
+  "/images/carreteweb/fto34.webp",
+  "/images/carreteweb/fto3.webp",
+  "/images/carreteweb/fto4.webp",
+];
+---
+
+<Layout titulo="Carrete 📷" protegida={true}>
+  <main
+    class="pantalla pantalla--centro"
+    style="--opacidad-fotos: 0.3;"
+  >
+    
+    <h1 class="titulo-pagina">Un poco de nosotros</h1>
+    <VolverTulipan destino="/hub" etiqueta="Volver al menú" />
+    <Carrete />
+  </main>
+</Layout>
+
+<style>
+  .pantalla--centro {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .pantalla--centro :global(.fondo) {
+    z-index: 0;
+  }
+
+  .pantalla--centro h1,
+  .pantalla--centro :global(.carrete) {
+    position: relative;
+    z-index: 1;
+  }
+</style>

@@ -1,0 +1,258 @@
+---
+import VolverTulipan from "../components/VolverTulipan.astro";
+import FondoFotos from "../components/FondoFotos.astro";
+const fotos = [
+  { src: "/images/carreteweb/fto1.webp", alt: "Describe la foto 1", pie: "♟️", mensaje: "Esta foto es de mis favoritas, salir del trabajo y que estés ahi es lo mejor del mundo, te lo digo siempre pero tu sonrisa ilumina mis días, tenemos que seguir jugando ajedrez porque estas bajita :P igual amo jugar contigo " },
+  { src: "/images/carreteweb/fto2.webp", alt: "Describe la foto 2", pie: "🎞️", mensaje: "CINEEEEE, el destino no quiso que cumplamos la promesa de ir más seguido, pero la cumpliremos apenas salga de esto.\n  de verdad podria ver cualquier pelicula si es a tu lado, me encanta verte asi de feliz, te ves hermosa mi vida💗" },
+  { src: "/images/carreteweb/fto3.webp", alt: "Describe la foto 3", pie: "🥢", mensaje: "Ese día estaba muuy apenado porque estaba misio y fue de las primeras veces que me atreví a decirtelo :' a ti no te importó eso y fuimos felices comiendo ajinomen y acariciando gatitos jaskdjk te amo infinitamente 💗" },
+  { src: "/images/carreteweb/fto51.webp", alt: "Describe la foto 4", pie: "🍷", mensaje: "💕\nLugar especial...\n💕 \nme encantó ese día, volver al lugar donde inicio todo después de todo lo que hemos vivido fue muy bonito.\n Aún recuerdo esa primera cita y me vuelvo loco pensando en como llegamos hasta aqui, fue perfecto.\n Todavía quiero volver asi que tenemos una cita pendiente" },
+  { src: "/images/carreteweb/fto5.webp", alt: "Describe la foto 5", pie: "💗", mensaje: "Nuestra primera vez en el parque de la amistad, y siendo mucho más que amigos :P fue un día muy bonito, observando patitos por un buen rato, quebuenavida" },
+  { src: "/images/carreteweb/fto6.webp", alt: "Describe la foto 6", pie: "🕯️", mensaje: "Ese mismo día hicimos nuestras velitas asdfghjkl te ves muy tierna en esta foto amor, por que eres tan hermosa? me divertí demasiado ese día, tenemos que repetir algo asi" },
+  { src: "/images/carreteweb/fto40.webp", alt: "Describe la foto 7", pie: "📖", mensaje: "Nuestra segunda vez en la feria del libro, queriamos comprar media feria y casicasi que salimos con las manos vacias jajaj volvería una y mil veces si es contigo💗" },
+  { src: "/images/carreteweb/fto19.webp", alt: "Describe la foto 8", pie: "💐", mensaje: "La vista era hermosa, pero tú estabas a otro nivel diomio, me acuerdo tu cara cuando porbaste los maki shots jajs, me hizo muy feliz que te hayan gustado tanto, como si yo los hubiera hecho aksjdk Nos debemos esa segunda cita ahi." },
+  { src: "/images/carreteweb/fto54.webp", alt: "Describe la foto 9", pie: "😾", mensaje: "nojaos \n esa es nuestra cara de comerpostres, me encanta \n no hace falta decir más" },
+  { src: "/images/carreteweb/fto10.webp", alt: "Describe la foto 10", pie: "🌽", mensaje: "Esos choclos fueron unadelicia, recien me habian trasquilado y que mejor que comer rico con el amordemivida :) teamo cuando volvemos por esos choclos?" },
+  { src: "/images/carreteweb/fto11.webp", alt: "Describe la foto 11", pie: "🍜", mensaje: "Día de rameras \n que nunca falte buldak o cita en kurokuma porfavor, siento que ya es algo nuestro 💗" },
+    { src: "/images/carreteweb/fto12.webp", alt: "Describe la foto 12", pie: "🌲", mensaje: "Fotito navideña, me encanta esta porque siento que eres muy tú jajajs ya me hace falta tomarte fotos haciendo cualquier cosa, muak💓" },
+  { src: "/images/carreteweb/fto13.webp", alt: "Describe la foto 13", pie: "❤️‍🔥", mensaje: "Otra de mis favoritas🫠 me derrito cuando te apoyas en mi hombro, tenerte asi de cerca se siente muy bonito, nunca es suficientementecerca, me da paz ver eta foto, te extraño mucho mi amor " },
+    { src: "/images/carreteweb/fto14.webp", alt: "Describe la foto 14", pie: "💕", mensaje: "Esta es de cuando andamos en bici jajjaskd pedaleamos duro, casi nos caemos unas cuantas veces, y casi te agarras de los pelos con una random, no sé como sobrevivimos a esa ciclovia pero me divertí muchisimo, hagamosolo de nuevo pero esta vez yo manejo todo el camino jajs." },
+  { src: "/images/carreteweb/fto48.webp", alt: "Describe la foto 15", pie: "📸", mensaje: "Me encanta poder tener estas fotos en llavero, la veo a cada rato cuando llevo mi mochila, es bonito tener una version mini de nosotro :) nos han faltado fotitos en cabina de algunos meses, tenemos que ponernos al día" },
+  { src: "/images/carreteweb/fto27.webp", alt: "Describe la foto 16", pie: "🖼️", mensaje: "fotitoteatro \n ni entramos pero igual cuenta :P \n me gustó mucho que me acompañaras y tener ese paseito juntos, no olvido que prometí que te llevaría a una función, sevienencositas" },
+  { src: "/images/carreteweb/fto17.webp", alt: "Describe la foto 17", pie: "🎄", mensaje: "Una navidad más juntos \n y ya no falta nada para la tercera c: no sabes lo feliz que me hace pasarlo a tu lado, es una epoca que me gusta bastante desde chiquito, y compartirla con quienes amo siempre me ha hecho feliz, espero pronto podamos recibir las 12:00 juntos " },
+  { src: "/images/carreteweb/fto18.webp", alt: "Describe la foto 18", pie: "⛱️", mensaje: "Que foto tan bella diomio, facil 2 de las cosas más hermosas del universo en una sola foto, el mar y tú, recuerdo ese día con mucha felicidad y calma, no habia tenido una buena jornada y tú, cómo acostumbras, llegaste a alegrarme el día, no miento cuando digo que verte me quita hasta el cansancio, eres mi cafecito de bolsillo💗" },
+
+];
+---
+ <FondoFotos
+  imagenes={["/images/carreteweb/fto7.webp", "/images/carreteweb/fto14.webp", "/images/carreteweb/fto24.webp", "/images/carreteweb/fto30.webp", "/images/carreteweb/fto15.webp", "/images/carreteweb/fto17.webp", "/images/carreteweb/fto16.webp", "/images/carreteweb/fto34.webp", "/images/carreteweb/fto26.webp", "/images/carreteweb/fto25.webp"]}
+  filas={7}
+  ancho={130}
+  alto={170}
+  velocidad={90}
+/>
+<section class="carrete" aria-label="Carrete de fotos">
+  {fotos.map((foto, i) => (
+    <button
+      type="button"
+      class="polaroid"
+      style={`--i: ${i}`}
+      data-src={foto.src}
+      data-alt={foto.alt}
+      data-pie={foto.pie}
+      data-mensaje={foto.mensaje}
+    >
+      <img src={foto.src} alt={foto.alt} loading="lazy" decoding="async" />
+      <span class="polaroid__pie">{foto.pie}</span>
+    </button>
+  ))}
+</section>
+
+<dialog class="visor" aria-label="Foto ampliada">
+  <button type="button" class="carta" aria-pressed="false">
+    <span class="carta__interior">
+      <span class="carta__cara carta__frente">
+        <img class="visor__img" alt="" />
+        <span class="visor__pie"></span>
+      </span>
+      <span class="carta__cara carta__reverso">
+        <span class="visor__mensaje"></span>
+      </span>
+    </span>
+  </button>
+ <VolverTulipan destino="/carrete" etiqueta="Volver al carrete" />
+</dialog>
+
+<script>
+  const visor = document.querySelector<HTMLDialogElement>(".visor")!;
+  const carta = visor.querySelector<HTMLElement>(".carta")!;
+  const img = visor.querySelector<HTMLImageElement>(".visor__img")!;
+  const pie = visor.querySelector<HTMLElement>(".visor__pie")!;
+  const mensaje = visor.querySelector<HTMLElement>(".visor__mensaje")!;
+
+  document.querySelectorAll<HTMLElement>(".polaroid").forEach((polaroid) => {
+    polaroid.addEventListener("click", () => {
+      img.src = polaroid.dataset.src!;
+      img.alt = polaroid.dataset.alt!;
+      pie.textContent = polaroid.dataset.pie!;
+      mensaje.textContent = polaroid.dataset.mensaje!;
+      carta.classList.remove("carta--volteada");
+      carta.setAttribute("aria-pressed", "false");
+      visor.showModal();
+    });
+  });
+
+  carta.addEventListener("click", () => {
+    const volteada = carta.classList.toggle("carta--volteada");
+    carta.setAttribute("aria-pressed", String(volteada));
+  });
+
+  visor.querySelector(".visor__cerrar")!.addEventListener("click", () => visor.close());
+
+  // El visor es transparente: un clic "en el diálogo" en realidad es un clic fuera de la tarjeta
+  visor.addEventListener("click", (e) => {
+    if (e.target === visor) visor.close();
+  });
+</script>
+
+<style>
+  .carrete {
+    display: flex;
+    gap: 1.25rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 2rem 10vw 3rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+ .carrete {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+  justify-items: center;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  width: min(100%, 980px);
+  box-sizing: border-box;
+  margin-inline: auto;
+  padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 5rem;
+  overflow: visible;
+}
+
+  .polaroid {
+    width: 100%;
+    max-width: 185px;
+    box-sizing: border-box;
+    display: block;
+    margin: 0;
+    padding: 0.6rem 0.6rem 0;
+    border: none;
+    background: #fffdf8;
+    border-radius: 4px;
+    box-shadow: 0 8px 20px rgb(63 64 56 / 0.22);
+    font: inherit;
+    color: var(--color-texto);
+    text-align: center;
+    cursor: pointer;
+    scroll-snap-align: center;
+    rotate: var(--giro, 0deg);
+    transition: rotate 0.35s ease, translate 0.35s ease, box-shadow 0.35s ease;
+    animation: revelar 0.6s ease-out both;
+    animation-delay: calc(var(--i) * 120ms);
+  }
+  .polaroid:nth-child(odd) {
+    --giro: -2deg;
+  }
+  .polaroid:nth-child(even) {
+    --giro: 2deg;
+  }
+  .polaroid:hover,
+  .polaroid:focus-visible {
+    rotate: 0deg;
+    translate: 0 -8px;
+    box-shadow: 0 16px 28px rgb(63 64 56 / 0.28);
+  }
+  .polaroid img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 2px;
+  }
+  .polaroid__pie {
+    display: block;
+    padding: 0.6rem 0.2rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  /* Visor ampliado. Se muestra con display solo cuando está abierto */
+  .visor {
+    padding: 0;
+    border: none;
+    background: transparent;
+    overflow: visible;
+  }
+  .visor[open] {
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+    animation: abrir 0.35s ease-out;
+  }
+  .visor::backdrop {
+    background: rgb(63 64 56 / 0.6);
+    backdrop-filter: blur(4px);
+  }
+
+  .carta {
+    display: block;
+    width: min(86vw, 340px);
+    aspect-ratio: 4 / 5;
+    padding: 0;
+    border: none;
+    background: none;
+    perspective: 1000px;
+    font: inherit;
+    color: var(--color-texto);
+    cursor: pointer;
+  }
+  .carta__interior {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+  }
+  .carta--volteada .carta__interior {
+    transform: rotateY(180deg);
+  }
+  .carta__cara {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border-radius: 6px;
+    background: #fffdf8;
+    box-shadow: 0 18px 40px rgb(0 0 0 / 0.35);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .carta__frente {
+    padding: 0.9rem 0.9rem 0;
+  }
+  .visor__img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 2px;
+  }
+  .visor__pie {
+    display: block;
+    padding: 1rem 0.25rem;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+  .carta__reverso {
+    display: grid;
+    place-content: center;
+    padding: 1.5rem;
+    text-align: center;
+    line-height: 1.6;
+    white-space: pre-line;
+    transform: rotateY(180deg);
+  }
+
+  /* Tu parte: estilos de .visor__cerrar */
+
+  @keyframes revelar {
+    from { opacity: 0; scale: 0.9; }
+    to { opacity: 1; scale: 1; }
+  }
+  @keyframes abrir {
+    from { opacity: 0; scale: 0.92; }
+    to { opacity: 1; scale: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .polaroid, .visor[open] { animation: none; }
+    .polaroid, .carta__interior { transition: none; }
+  }
+</style>

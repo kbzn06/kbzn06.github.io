@@ -1,0 +1,161 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { preguntas } from "../data/quiz.js";
+---
+
+<Layout titulo="Love Pass 🌷">
+  <main class="pantalla pantalla--centro">
+    <div class="quiz">
+      <div class="quiz__barra"><div class="quiz__progreso"></div></div>
+
+      {preguntas.map((p, i) => (
+        <section class="pregunta" data-correcta={p.correcta}>
+          <p class="pregunta__numero">Pregunta {i + 1} de {preguntas.length}</p>
+          <h2 class="titulo-pagina">{p.pregunta}</h2>
+          <div class="opciones">
+            {p.opciones.map((texto, j) => (
+              <button type="button" class="opcion" data-indice={j}>{texto}</button>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { darPase, tienePase } from "../scripts/progreso.js";
+  console.log("quiz arrancó");
+
+  // Si ya pasó el quiz antes, no se lo repetimos
+  if (tienePase()) location.replace("/hub");
+
+  const secciones = document.querySelectorAll<HTMLElement>(".pregunta");
+  const progreso = document.querySelector<HTMLElement>(".quiz__progreso")!;
+  let actual = 0;
+  let terminado = false;
+
+  function mostrar(indice: number) {
+    secciones.forEach((s, i) =>
+      s.classList.toggle("pregunta--activa", i === indice)
+    );
+    progreso.style.width = `${(indice / secciones.length) * 100}%`;
+  }
+
+  function avanzar() {
+    actual++;
+    if (actual < secciones.length) {
+      mostrar(actual);
+    } else {
+      terminado = true;
+      darPase();
+      progreso.style.width = "100%";
+      setTimeout(() => (location.href = "/hub"), 600);
+    }
+  }
+
+  secciones.forEach((seccion) => {
+    const correcta = Number(seccion.dataset.correcta);
+
+    seccion.querySelectorAll<HTMLButtonElement>(".opcion").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        if (terminado) return;
+
+        if (Number(boton.dataset.indice) === correcta) {
+          avanzar();
+        } else {
+          boton.classList.add("opcion--error");
+          boton.addEventListener(
+            "animationend",
+            () => boton.classList.remove("opcion--error"),
+            { once: true }
+          );
+        }
+      });
+    });
+  });
+
+  mostrar(0);
+</script>
+
+<style>
+  .quiz {
+    width: min(100%, 440px);
+    padding: 2rem 1.5rem;
+    border-radius: 1.5rem;
+    background: rgb(255 255 255 / 0.55);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 30px rgb(63 64 56 / 0.15);
+  }
+  .quiz__barra {
+    height: 6px;
+    margin-bottom: 1.5rem;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.1);
+    overflow: hidden;
+  }
+  .quiz__progreso {
+    height: 100%;
+    width: 0;
+    background: var(--color-brillo);
+    transition: width 0.4s ease;
+  }
+
+  .pregunta {
+    display: none;
+  }
+  .pregunta--activa {
+    display: block;
+    animation: entrar 0.4s ease-out both;
+  }
+  .pregunta__numero {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.15rem;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  h2 {
+    margin: 0.5rem 0 1.5rem;
+    font-family: "Bank Gothic", sans-serif;
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+  }
+
+  .opciones {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .opcion {
+    padding: 0.9rem 1rem;
+    border: none;
+    border-radius: 999px;
+    background: var(--color-cielo);
+    color: var(--color-texto);
+    font: inherit;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .opcion:hover {
+    transform: translateY(-2px);
+    background: var(--color-brillo);
+  }
+  .opcion--error {
+    background: #f4b6a8;
+    animation: sacudida 0.4s;
+  }
+
+  @keyframes entrar {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes sacudida {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pregunta--activa, .opcion--error { animation: none; }
+    .quiz__progreso { transition: none; }
+  }
+</style>
