@@ -1,4 +1,4 @@
-import { canciones } from "../../data/canciones.js";
+import { canciones } from "../data/canciones.js";
 
 export function GET() {
   const lista = canciones.map((c) => ({
