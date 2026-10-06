@@ -7,10 +7,17 @@ const { titulo = "Un poco de nosotros 🌷🦥", protegida = false } = Astro.pro
 <!doctype html>
 <html lang="es">
   <head>
+    <script is:inline>
+  const navegacion = performance.getEntriesByType("navigation")[0];
+
+  if (navegacion?.type === "reload") {
+    localStorage.removeItem("our13-pin-ok");
+  }
+</script>
     <meta charset="utf-8" />
     {protegida && (
       <script is:inline>
-        if (localStorage.getItem("our13-pase") !== "ok") {
+       if (localStorage.getItem("our13-pin-ok") !== "ok")  {
           location.replace("/quiz");
         }
       </script>

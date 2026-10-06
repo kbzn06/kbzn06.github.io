@@ -1,4 +1,4 @@
-const CLAVE = "our13-pase";
+const CLAVE = "our13-pin-ok";
 
 export function tienePase() {
   try {

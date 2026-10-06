@@ -1,161 +1,288 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { preguntas } from "../data/quiz.js";
 ---
 
-<Layout titulo="Love Pass 🌷">
+<Layout titulo="Ingresar PIN 🌷">
   <main class="pantalla pantalla--centro">
-    <div class="quiz">
-      <div class="quiz__barra"><div class="quiz__progreso"></div></div>
+   <form class="quiz" id="form-pin">
+  <h1 class="titulo-pagina">Ingresa el PIN</h1>
+  <p class="pin__instruccion">Escribe los 6 dígitos para continuar</p>
 
-      {preguntas.map((p, i) => (
-        <section class="pregunta" data-correcta={p.correcta}>
-          <p class="pregunta__numero">Pregunta {i + 1} de {preguntas.length}</p>
-          <h2 class="titulo-pagina">{p.pregunta}</h2>
-          <div class="opciones">
-            {p.opciones.map((texto, j) => (
-              <button type="button" class="opcion" data-indice={j}>{texto}</button>
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
+  <input id="pin" type="hidden" />
+
+  <div class="pin__indicadores" aria-hidden="true">
+    {Array.from({ length: 6 }).map(() => (
+      <span class="pin__punto" data-pin-punto></span>
+    ))}
+  </div>
+
+  <p class="pin__estado" id="pin-estado" aria-live="polite">
+    PIN: 0 de 6 dígitos
+  </p>
+
+  <div class="pin__teclado" id="pin-teclado" aria-label="Teclado numérico">
+    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((numero) => (
+      <button
+        type="button"
+        class="pin__tecla"
+        data-numero={numero}
+        aria-label={`Número ${numero}`}
+      >
+        {numero}
+      </button>
+    ))}
+
+    <button
+      type="button"
+      class="pin__tecla pin__tecla--accion"
+      data-borrar
+      aria-label="Borrar el último dígito"
+    >
+      ⌫
+    </button>
+
+    <button type="button" class="pin__tecla" data-numero="0" aria-label="Número 0">
+      0
+    </button>
+
+    <button
+      type="button"
+      class="pin__tecla pin__tecla--accion"
+      data-limpiar
+      aria-label="Limpiar el PIN"
+    >
+      C
+    </button>
+  </div>
+
+  <button class="pin__boton" type="submit" disabled>
+    Entrar
+  </button>
+</form>
   </main>
 </Layout>
 
 <script>
   import { darPase, tienePase } from "../scripts/progreso.js";
-  console.log("quiz arrancó");
 
-  // Si ya pasó el quiz antes, no se lo repetimos
-  if (tienePase()) location.replace("/hub");
+  const PIN_CORRECTO = "131024"; // Reemplázalo por tu PIN de 6 dígitos.
 
-  const secciones = document.querySelectorAll<HTMLElement>(".pregunta");
-  const progreso = document.querySelector<HTMLElement>(".quiz__progreso")!;
-  let actual = 0;
-  let terminado = false;
-
-  function mostrar(indice: number) {
-    secciones.forEach((s, i) =>
-      s.classList.toggle("pregunta--activa", i === indice)
-    );
-    progreso.style.width = `${(indice / secciones.length) * 100}%`;
+  if (tienePase()) {
+    location.replace("/hub");
   }
 
-  function avanzar() {
-    actual++;
-    if (actual < secciones.length) {
-      mostrar(actual);
-    } else {
-      terminado = true;
-      darPase();
-      progreso.style.width = "100%";
-      setTimeout(() => (location.href = "/hub"), 600);
-    }
-  }
+  const formulario = document.querySelector<HTMLFormElement>("#form-pin");
+  const entrada = document.querySelector<HTMLInputElement>("#pin");
+  const estado = document.querySelector<HTMLElement>("#pin-estado");
+  const teclado = document.querySelector<HTMLElement>("#pin-teclado");
+  const botonEntrar = formulario?.querySelector<HTMLButtonElement>(
+    'button[type="submit"]'
+  );
+  const puntos = document.querySelectorAll<HTMLElement>("[data-pin-punto]");
 
-  secciones.forEach((seccion) => {
-    const correcta = Number(seccion.dataset.correcta);
-
-    seccion.querySelectorAll<HTMLButtonElement>(".opcion").forEach((boton) => {
-      boton.addEventListener("click", () => {
-        if (terminado) return;
-
-        if (Number(boton.dataset.indice) === correcta) {
-          avanzar();
-        } else {
-          boton.classList.add("opcion--error");
-          boton.addEventListener(
-            "animationend",
-            () => boton.classList.remove("opcion--error"),
-            { once: true }
-          );
-        }
+  if (formulario && entrada && estado && teclado && botonEntrar) {
+    function actualizarIndicadores() {
+      puntos.forEach((punto, indice) => {
+        punto.classList.toggle(
+          "pin__punto--activo",
+          indice < entrada.value.length
+        );
       });
-    });
-  });
 
-  mostrar(0);
+      estado.textContent = `PIN: ${entrada.value.length} de 6 dígitos`;
+      botonEntrar.disabled = entrada.value.length !== 6;
+    }
+
+    teclado.addEventListener("click", (evento) => {
+      const objetivo =
+        evento.target instanceof Element
+          ? evento.target.closest<HTMLButtonElement>("button")
+          : null;
+
+      if (!objetivo || !teclado.contains(objetivo)) return;
+
+      if (objetivo.dataset.numero && entrada.value.length < 6) {
+        entrada.value += objetivo.dataset.numero;
+      } else if (objetivo.hasAttribute("data-borrar")) {
+        entrada.value = entrada.value.slice(0, -1);
+      } else if (objetivo.hasAttribute("data-limpiar")) {
+        entrada.value = "";
+      }
+
+      actualizarIndicadores();
+    });
+
+    formulario.addEventListener("submit", (evento) => {
+      evento.preventDefault();
+
+      if (entrada.value === PIN_CORRECTO) {
+        darPase();
+        estado.textContent = "PIN correcto.";
+        botonEntrar.disabled = true;
+        setTimeout(() => location.replace("/hub"), 400);
+        return;
+      }
+
+      estado.textContent = "PIN incorrecto. Inténtalo otra vez.";
+      formulario.classList.remove("quiz--error");
+      void formulario.offsetWidth;
+      formulario.classList.add("quiz--error");
+      entrada.value = "";
+      actualizarIndicadores();
+    });
+
+    actualizarIndicadores();
+  }
 </script>
 
 <style>
   .quiz {
+    box-sizing: border-box;
     width: min(100%, 440px);
     padding: 2rem 1.5rem;
     border-radius: 1.5rem;
     background: rgb(255 255 255 / 0.55);
     backdrop-filter: blur(6px);
     box-shadow: 0 10px 30px rgb(63 64 56 / 0.15);
-  }
-  .quiz__barra {
-    height: 6px;
-    margin-bottom: 1.5rem;
-    border-radius: 999px;
-    background: rgb(0 0 0 / 0.1);
-    overflow: hidden;
-  }
-  .quiz__progreso {
-    height: 100%;
-    width: 0;
-    background: var(--color-brillo);
-    transition: width 0.4s ease;
+    text-align: center;
   }
 
-  .pregunta {
-    display: none;
-  }
-  .pregunta--activa {
-    display: block;
-    animation: entrar 0.4s ease-out both;
-  }
-  .pregunta__numero {
-    margin: 0;
-    font-size: 0.75rem;
-    letter-spacing: 0.15rem;
-    text-transform: uppercase;
-    opacity: 0.6;
-  }
-  h2 {
-    margin: 0.5rem 0 1.5rem;
+  .quiz h1 {
+    margin-top: 0;
     font-family: "Bank Gothic", sans-serif;
-    font-size: clamp(1.3rem, 5vw, 1.8rem);
   }
 
-  .opciones {
-    display: grid;
-    gap: 0.75rem;
+  .pin__instruccion {
+    margin-bottom: 1rem;
   }
-  .opcion {
-    padding: 0.9rem 1rem;
-    border: none;
+
+  .pin__indicadores {
+    display: flex;
+    justify-content: center;
+    gap: 0.7rem;
+    margin: 1.25rem 0 0.5rem;
+  }
+
+  .pin__punto {
+    width: 0.8rem;
+    height: 0.8rem;
+    border: 2px solid var(--color-texto);
+    border-radius: 50%;
+    transition: background 160ms ease, transform 160ms ease;
+  }
+
+  .pin__punto--activo {
+    background: var(--color-brillo);
+    transform: scale(1.15);
+  }
+
+  .pin__estado {
+    min-height: 1.5em;
+    line-height: 1.5;
+  }
+
+  .pin__teclado {
+    display: grid;
+    grid-template-columns: repeat(3, 3.5rem);
+    justify-content: center;
+    gap: 0.65rem;
+    margin: 1.25rem auto;
+  }
+
+  .pin__tecla {
+    width: 3.5rem;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 1px solid rgb(132 97 63 / 0.35);
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-cielo), #fff0df);
+    color: var(--color-texto);
+    font-family: "Rainy Hearts", cursive;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  .pin__tecla:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgb(63 64 56 / 0.18);
+  }
+
+  .pin__tecla--accion {
+    font-family: inherit;
+    font-size: 1.2rem;
+  }
+
+  .pin__boton {
+    min-height: 46px;
+    margin-top: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    border: 1px solid rgb(132 97 63 / 0.35);
     border-radius: 999px;
-    background: var(--color-cielo);
+    background: linear-gradient(135deg, var(--color-cielo), #fff0df);
     color: var(--color-texto);
     font: inherit;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgb(63 64 56 / 0.15);
     cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-  }
-  .opcion:hover {
-    transform: translateY(-2px);
-    background: var(--color-brillo);
-  }
-  .opcion--error {
-    background: #f4b6a8;
-    animation: sacudida 0.4s;
+    transition: transform 180ms ease, box-shadow 180ms ease;
   }
 
-  @keyframes entrar {
-    from { opacity: 0; transform: translateX(24px); }
-    to { opacity: 1; transform: none; }
+  .pin__boton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 15px rgb(63 64 56 / 0.2);
   }
+
+  .pin__boton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pin__tecla:focus-visible,
+  .pin__boton:focus-visible {
+    outline: 3px solid var(--color-brillo);
+    outline-offset: 3px;
+  }
+
+  .quiz--error {
+    animation: sacudida 0.35s;
+  }
+
   @keyframes sacudida {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    75% { transform: translateX(8px); }
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    25% {
+      transform: translateX(-7px);
+    }
+
+    75% {
+      transform: translateX(7px);
+    }
+  }
+
+  @media (max-width: 360px) {
+    .pin__teclado {
+      grid-template-columns: repeat(3, 3.2rem);
+      gap: 0.5rem;
+    }
+
+    .pin__tecla {
+      width: 3.2rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .pregunta--activa, .opcion--error { animation: none; }
-    .quiz__progreso { transition: none; }
+    .quiz--error {
+      animation: none;
+    }
+
+    .pin__punto,
+    .pin__tecla,
+    .pin__boton {
+      transition: none;
+    }
   }
 </style>
