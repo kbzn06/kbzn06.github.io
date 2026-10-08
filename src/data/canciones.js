@@ -1,6 +1,6 @@
 /** @type {{ titulo: string, artista: string, archivo: string, portada?: string }[]} */
 export const canciones = [
-  { titulo: "ONLY", artista: "LEEHI", archivo: "/audio/only.mp3" },
+    { titulo: "Mariposas en el pecho", artista: "Manuel Medrano", archivo: "/audio/mariposas.mp3" },
   { titulo: "TEAR IN MY HEART", artista: "Top", archivo: "/audio/tearheart.mp3" },
   { titulo: "Best Part", artista: "Daniel Caesar", archivo: "/audio/bestpart.mp3" },
   { titulo: "GLUE SONG", artista: "Beabadoobee", archivo: "/audio/gluesong.mp3" },
@@ -13,6 +13,7 @@ export const canciones = [
   { titulo: "Selfless", artista: "The Strokes", archivo: "/audio/selfless.mp3" },
   { titulo: "the perfect pair", artista: "Beabadoobeee", archivo: "/audio/theperfectpair.mp3" },
   { titulo: "y como te digo que", artista: "Latin Mafia", archivo: "/audio/ycomotedigoque.mp3" },
-  // añade las demás tú
+  { titulo: "Only", artista: "LEEHI", archivo: "/audio/only.mp3" },
+  { titulo: "Sunny days", artista: "Wave to earth", archivo: "/audio/sunnydays.mp3" },
 ];
 

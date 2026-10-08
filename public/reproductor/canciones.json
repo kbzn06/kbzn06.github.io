@@ -1,5 +1,5 @@
 [
-  { "title": "ONLY", "artist": "LEEHI", "file": "../audio/only-leehi.mp3", "art": "/images/album/leehi.webp"},
+  { "title": "ONLY", "artist": "LEEHI", "file": "../audio/only.mp3", "art": "/images/album/leehi.webp"},
   { "title": "TEAR IN MY HEART", "artist": "Top", "file": "../audio/tearheart.mp3", "art": "/images/album/top.webp" },
   { "title": "Best Part", "artist": "Daniel Caesar", "file": "../audio/bestpart.mp3", "art": "/images/album/daniel.webp" },
   { "title": "GLUE SONG", "artist": "Beabadoobee", "file": "../audio/gluesong.mp3", "art": "/images/album/bea.webp" },
@@ -11,5 +11,7 @@
   { "title": "mykindofwoman", "artist": "Mac de marco", "file": "../audio/mykindofwoman.mp3", "art": "/images/album/macdemarco.webp" },
   { "title": "Selfless", "artist": "The Strokes", "file": "../audio/selfless.mp3", "art": "/images/album/strokes.webp" },
   { "title": "the perfect pair", "artist": "Beabadoobeee", "file": "../audio/theperfectpair.mp3", "art": "/images/album/beaba.webp" },
-  { "title": "y como te digo que", "artist": "Latin Mafia", "file": "../audio/ycomotedigoque.mp3", "art": "/images/album/latin.webp" }
+  { "title": "y como te digo que", "artist": "Latin Mafia", "file": "../audio/ycomotedigoque.mp3", "art": "/images/album/latin.webp" },
+    { "title": "Mariposas en el pecho", "artist": "Manuel Medrano", "file": "../audio/mariposas.mp3", "art": "/images/album/manuel.webp" },
+  { "title": "Sunny days", "artist": "Wave to earth", "file": "../audio/sunnydays.mp3", "art": "/images/album/w2e.webp" }
 ]

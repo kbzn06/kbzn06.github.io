@@ -74,7 +74,13 @@ export const dias = [
   bloques: [
     { tipo: "mensaje", contenido: "Hoy toca vale de nuevo C:" },
     { tipo: "ticket", frente: "Adivina de que...", contenido: "UN BESOTE MIO 😽" },
-  ],
+        { tipo: "mensaje", contenido: "segundointento \n Amor mio, quieres saber más sobre la cita que he planeado para tú cumpleaños?👀 " },
+      { tipo: "ticket", frente: "Rasga aqui", contenido: "El 12 vas a necesitar de algo para una de tus sorpresas...\n pero no te preocupes, yo lo tengo :P \n puedes recogerlo cuando quieras\n Ah si, para revelar algo más, toca tu mini-me jeje" },
+       { tipo: "audio", archivo: "/audio/mariposas.mp3", titulo: "<3" },
+
+    ],
+  
+  
 }, 
 
 { numero: 9,

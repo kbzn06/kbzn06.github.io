@@ -2,7 +2,6 @@
 import { dias } from "../data/dias.js";
 import { FECHA_FINAL, TOTAL_DIAS } from "../data/config.js";
 import RecorridoCumple from "./RecorridoCumple.astro";
-// Convierte el formato antiguo (tipo + campos) en una lista de bloques
 function bloquesDe(dia) {
   if (Array.isArray(dia.bloques)) return dia.bloques;
   const lista = [];
@@ -17,24 +16,92 @@ function fechaDesbloqueo(numero: number) {
 }
 const stickers = [
   { src: "/images/deco/gift.webp", clase: "calendario__sticker--capi" },
-  { src: "/images/deco/dentista.png", clase: "calendario__sticker--dentista" },
+  { src: "/images/deco/dentista.png", clase: "calendario__sticker--dentista", secreto: true },
 ];
 ---
 
 <section class="calendario" id="dias">
   <h2>Doce días <br> Doce sorpresas</h2>
-  <div class="calendario__stickers" aria-hidden="true">
-  {stickers.map((sticker) => (
-    <img
-      class={`calendario__sticker ${sticker.clase}`}
-      src={sticker.src}
-      alt=""
-      loading="lazy"
-      decoding="async"
-    />
-  ))}
+<div class="calendario__stickers">
+  {stickers.map((sticker) =>
+    sticker.secreto ? (
+      <button
+        type="button"
+        class={`calendario__sticker ${sticker.clase} calendario__sticker--secreto`}
+        data-sticker-secreto
+        
+        aria-label="Abrir sorpresa secreta"
+      >
+        <img src={sticker.src} alt="" aria-hidden="true" />
+      </button>
+    ) : (
+      <img
+        class={`calendario__sticker ${sticker.clase}`}
+        src={sticker.src}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
+ 
+    )
+  )}
 </div>
 
+
+<dialog class="sorpresa-cita" data-dialogo-cita>
+  <div class="cita__tarjeta" data-cita-tarjeta>
+    <div class="cita__interior">
+      <section class="cita__cara cita__pregunta" data-cita-pregunta>
+        <h2>¿Quieres ir a una cita cumpleañera conmigo?</h2>
+
+        <div class="cita__botones">
+          <button type="button" class="cita__si" data-cita-si>
+            SÍ MI AMOR 💕
+          </button>
+          <button type="button" class="cita__no" data-cita-no>
+            No wakala mugroso
+          </button>
+        </div>
+      </section>
+
+      <section
+        class="cita__cara cita__imagen"
+        data-cita-imagen
+        aria-hidden="true"
+      >
+        <img
+          class="cita__foto"
+          src="/images/deco/invitacion.png"
+          alt="Nuestra cita cumpleañera"
+          data-zoom-cita
+          role="button"
+          tabindex="0"
+          aria-pressed="false"
+          aria-label="Ampliar imagen"
+        />
+      </section>
+    </div>
+  </div>
+
+  <div class="cita__confeti" aria-hidden="true">
+    {Array.from({ length: 80}, (_, i) => (
+      <span
+style={`--x: ${Math.abs(Math.sin((i + 1) * 12.9898) * 43758.5453) % 100}%; --delay: ${((i * 0.17) % 2).toFixed(2)}s; --size: ${1 + (i % 3) * 0.45}rem`}>        {i % 3 === 0 ? "💗" : "💗"}
+      </span>
+    ))}
+  </div>
+  <div class="cita__triste" data-cara-triste aria-hidden="true">😿</div>
+
+  <button
+    type="button"
+    class="cita__volver"
+    data-cerrar-cita
+    aria-label="Volver al calendario"
+  >
+    <img src="/images/deco/tulip.png" alt="" aria-hidden="true" />
+  </button>
+</dialog>
   <div class="calendario__rejilla">
     {dias.map((dia) => (
       <button
@@ -154,9 +221,27 @@ const stickers = [
   import { ahora } from "../scripts/tiempo.js";
 
   const GUARDADO = "our13-abiertos";
+  const tarjetaCita = document.querySelector<HTMLDivElement>("[data-cita-tarjeta]");
+const botonSi = document.querySelector<HTMLButtonElement>("[data-cita-si]");
+const botonNo = document.querySelector<HTMLButtonElement>("[data-cita-no]");
+const preguntaCita = document.querySelector<HTMLElement>("[data-cita-pregunta]");
+const imagenCita = document.querySelector<HTMLElement>("[data-cita-imagen]");
+const caraTriste = document.querySelector<HTMLElement>("[data-cara-triste]");
+const UMBRAL_CARITA_TRISTE = 10;
+let intentosNo = 0;
   const botones = document.querySelectorAll<HTMLButtonElement>(".dia");
   const dialogo = document.querySelector<HTMLDialogElement>(".sorpresa")!;
   const cuerpo = dialogo.querySelector<HTMLDivElement>(".sorpresa__cuerpo")!;
+  const stickerSecreto = document.querySelector<HTMLButtonElement>(
+  "[data-sticker-secreto]"
+  
+);
+const dia7 = document.querySelector<HTMLButtonElement>(
+  '.dia[data-numero="7"]'
+);
+const dialogoCita = document.querySelector<HTMLDialogElement>(
+  "[data-dialogo-cita]"
+);
 
   function leerAbiertos(): number[] {
     try {
@@ -168,6 +253,7 @@ const stickers = [
       return [];
     }
   }
+  
 
   function guardarAbierto(numero: number) {
     const abiertos = leerAbiertos();
@@ -179,12 +265,11 @@ const stickers = [
           JSON.stringify([...abiertos, numero])
         );
       } catch {
-        // El calendario todavía puede abrir la sorpresa si el almacenamiento está bloqueado.
       }
     }
   }
 
-  function actualizar(primeraVez = false) {
+   function actualizar(primeraVez = false) {
     const hoy = ahora();
     const abiertos = leerAbiertos();
 
@@ -205,6 +290,13 @@ const stickers = [
         boton.classList.add("dia--estallido");
       }
     });
+
+    const fechaDia7 = dia7?.dataset.desbloqueo;
+
+    if (stickerSecreto) {
+      stickerSecreto.disabled =
+        !fechaDia7 || hoy < new Date(fechaDia7);
+    }
   }
 
   botones.forEach((boton) => {
@@ -253,7 +345,6 @@ const stickers = [
   dialogo.addEventListener("click", (evento) => {
     if (evento.target === dialogo) dialogo.close();
   });
-// Si un día tiene varias canciones, solo suena una a la vez
 cuerpo.addEventListener(
   "play",
   (e) => {
@@ -284,13 +375,122 @@ cuerpo.addEventListener("click", (evento) => {
   const volteada = carta.classList.toggle("carta--volteada");
   carta.setAttribute("aria-pressed", String(volteada));
 });
+const fotoCita = document.querySelector<HTMLImageElement>("[data-zoom-cita]");
 
-  dialogo.addEventListener("close", () => {
-    cuerpo.replaceChildren();
+function sacudir(boton: HTMLButtonElement | null) {
+  if (!boton) return;
+
+  boton.classList.remove("cita__boton--sacudida");
+  void boton.offsetWidth;
+  boton.classList.add("cita__boton--sacudida");
+}
+botonNo?.addEventListener("click", () => {
+  intentosNo += 1;
+
+  if (botonSi) {
+    botonSi.style.transform = `scale(${1 + intentosNo * 0.12})`;
+  }
+
+  if (preguntaCita && botonNo) {
+    const anchoDisponible =
+      preguntaCita.clientWidth - botonNo.offsetWidth - 24;
+    const altoDisponible =
+      preguntaCita.clientHeight - botonNo.offsetHeight - 24;
+
+    const izquierda = 12 + Math.random() * Math.max(0, anchoDisponible);
+    const arriba = 12 + Math.random() * Math.max(0, altoDisponible);
+
+    botonNo.classList.add("cita__no--escapa");
+    botonNo.style.left = `${izquierda}px`;
+    botonNo.style.top = `${arriba}px`;
+  }
+
+  if (intentosNo === UMBRAL_CARITA_TRISTE) {
+    caraTriste?.classList.add("cita__triste--visible");
+    caraTriste?.setAttribute("aria-hidden", "false");
+
+    window.setTimeout(() => {
+      caraTriste?.classList.remove("cita__triste--visible");
+      caraTriste?.setAttribute("aria-hidden", "true");
+    }, 1800);
+  }
+});
+
+botonSi?.addEventListener("click", () => {
+  tarjetaCita?.classList.add("cita__tarjeta--volteada");
+  preguntaCita?.setAttribute("aria-hidden", "true");
+  imagenCita?.setAttribute("aria-hidden", "false");
+});
+function alternarZoom() {
+  if (!fotoCita) return;
+
+  const ampliada = fotoCita.classList.toggle("cita__imagen--ampliada");
+  fotoCita.setAttribute("aria-pressed", String(ampliada));
+  fotoCita.setAttribute(
+    "aria-label",
+    ampliada ? "Reducir imagen" : "Ampliar imagen"
+  );
+}
+
+fotoCita?.addEventListener("click", alternarZoom);
+
+fotoCita?.addEventListener("keydown", (evento) => {
+  if (evento.key === "Enter" || evento.key === " ") {
+    evento.preventDefault();
+    alternarZoom();
+  }
+});
+document.querySelectorAll<HTMLButtonElement>("[data-cerrar-cita]").forEach((boton) => {
+  boton.addEventListener("click", () => dialogoCita?.close());
+});
+
+dialogoCita?.addEventListener("close", () => {
+  tarjetaCita?.classList.remove("cita__tarjeta--volteada");
+  preguntaCita?.setAttribute("aria-hidden", "false");
+  imagenCita?.setAttribute("aria-hidden", "true");
+
+  intentosNo = 0;
+
+  if (botonSi) {
+    botonSi.style.transform = "";
+  }
+
+  if (botonNo) {
+    botonNo.classList.remove("cita__no--escapa");
+    botonNo.style.removeProperty("left");
+    botonNo.style.removeProperty("top");
+  }
+
+  caraTriste?.classList.remove("cita__triste--visible");
+  caraTriste?.setAttribute("aria-hidden", "true");
+
+  fotoCita?.classList.remove("cita__imagen--ampliada");
+  fotoCita?.setAttribute("aria-pressed", "false");
+  fotoCita?.setAttribute("aria-label", "Ampliar imagen");
+});
+
+document
+  .querySelector(".calendario__stickers")
+  ?.addEventListener("click", (evento) => {
+    const objetivo =
+      evento.target instanceof Element
+        ? evento.target.closest<HTMLButtonElement>(
+            "[data-sticker-secreto]"
+          )
+        : null;
+
+    if (!objetivo || objetivo.disabled) return;
+
+    dialogoCita?.showModal();
   });
 
-  actualizar(true);
-  setInterval(() => actualizar(), 30_000);
+
+dialogo.addEventListener("close", () => {
+  cuerpo.replaceChildren();
+});
+
+actualizar(true);
+setInterval(() => actualizar(), 30_000);
 </script>
 
 <style>
@@ -313,6 +513,7 @@ cuerpo.addEventListener("click", (evento) => {
     font-size: clamp(1.8rem, 6vw, 3rem);
     letter-spacing: 0.06em;
   }
+
 
   .calendario h2::after {
     content: "✦";
@@ -808,19 +1009,6 @@ cuerpo.addEventListener("click", (evento) => {
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .dia,
-    .dia *,
-    .calendario__sticker,
-    .sorpresa[open],
-    .sorpresa[open]::backdrop,
-    .carta__interior,
-    .ticket__mitad,
-    .ticket__revelado {
-      animation: none !important;
-      transition: none !important;
-    }
-  }
   .carta__contenido {
   display: block;
   line-height: 1.5;
@@ -855,5 +1043,363 @@ cuerpo.addEventListener("click", (evento) => {
 
 .carta--imagen .carta__imagen {
   max-height: 70vh;
+}
+.calendario__sticker--secreto {
+  appearance: none;
+  box-sizing: border-box;
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.calendario__sticker--secreto img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.calendario__sticker--secreto:disabled {
+  cursor: default;
+}
+.sorpresa-cita {
+  box-sizing: border-box;
+  width: min(94vw, 560px);
+  height: min(86dvh, 700px);
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  overflow: visible;
+  border: 1px solid var(--linea-papel);
+ background: rgb(255 255 255 / 88%);
+
+  color: var(--tinta);
+}
+
+.sorpresa-cita::backdrop {
+  background: rgb(40 35 50 / 0.62);
+  backdrop-filter: blur(4px);
+}
+
+.cita__tarjeta,
+.cita__interior {
+  width: 100%;
+  height: 100%;
+}
+
+.cita__tarjeta {
+  perspective: 1000px;
+}
+
+.cita__interior {
+  position: relative;
+
+}
+
+.cita__confeti {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cita__confeti span {
+  position: absolute;
+  top: -10vh;
+  left: var(--x);
+}
+
+.sorpresa-cita:has(.cita__tarjeta--volteada) .cita__confeti span {
+  animation: lluvia-corazones 5s linear var(--delay) both;
+}
+
+@keyframes lluvia-corazones {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+  }
+
+  10%,
+  85% {
+    opacity: 1;
+  }
+
+  25% {
+    transform: translate3d(18px, 20vh, 0) rotate(90deg);
+  }
+
+  50% {
+    transform: translate3d(-14px, 55vh, 0) rotate(190deg);
+  }
+
+  75% {
+    transform: translate3d(12px, 85vh, 0) rotate(280deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(-8px, 115vh, 0) rotate(360deg);
+  }
+}
+
+.sorpresa-cita:has(.cita__tarjeta--volteada) {
+  box-shadow: 0 0 20px 5px rgb(255 217 160 / 55%);
+  animation: cita-pulso 2.4s ease-in-out infinite;
+}
+
+@keyframes cita-pulso {
+  0%, 100% {
+    box-shadow: 0 0 20px 5px rgb(255 217 160 / 55%);
+  }
+
+  50% {
+    box-shadow: 0 0 32px 9px rgb(255 217 160 / 85%);
+  }
+}
+
+.cita__cara {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+}
+
+.cita__pregunta {
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  gap: 2rem;
+  padding: 1.5rem;
+  text-align: center;
+  transition: opacity 180ms ease, transform 300ms ease, visibility 180ms;
+}
+
+.cita__pregunta h2 {
+  margin: 0;
+  font-family: "Rainy Hearts", cursive;
+  font-size: clamp(2rem, 8vw, 3rem);
+  font-weight: normal;
+  line-height: 1.1;
+}
+
+.cita__botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cita__si,
+.cita__no {
+  min-height: 48px;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid rgb(132 97 63 / 0.35);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-cielo), #fff0df);
+  color: var(--color-texto);
+  font: inherit;
+  cursor: pointer;
+}
+
+.cita__si {
+  transition: transform 200ms ease;
+}
+
+.cita__imagen {
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: rgb(255 255 255 / 88%);
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.82) translateY(18px);
+}
+
+.cita__imagen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.cita__no,
+.cita__si {
+  position: relative;
+}
+
+.cita__boton--sacudida {
+  animation: sacudida-cita 350ms ease;
+}
+
+@keyframes sacudida-cita {
+  0%, 100% { translate: 0 0; }
+  25% { translate: -5px 0; }
+  50% { translate: 5px 0; }
+  75% { translate: -3px 0; }
+}
+.cita__tarjeta--volteada .cita__pregunta {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.94);
+  pointer-events: none;
+}
+
+.cita__tarjeta--volteada .cita__imagen {
+  opacity: 1;
+  visibility: visible;
+  animation: cita-aparecer 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes cita-aparecer {
+  0% {
+    opacity: 0;
+    transform: scale(0.82) translateY(18px);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.035) translateY(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes flotar-cita {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -6px; }
+}
+
+.cita__imagen {
+  overflow: hidden;
+}
+.cita__foto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.cita__imagen img {
+  cursor: zoom-in;
+  transition: transform 350ms ease;
+}
+
+.cita__imagen img.cita__imagen--ampliada {
+  transform: scale(1.5);
+  cursor: zoom-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cita__confeti span {
+  animation: none !important;
+}
+
+  .dia,
+  .dia *,
+  .calendario__sticker,
+  .sorpresa[open],
+  .sorpresa[open]::backdrop,
+  .carta__interior,
+  .ticket__mitad,
+  .ticket__revelado,
+  .cita__boton--sacudida,
+  .cita__tarjeta--volteada .cita__imagen,
+  .sorpresa-cita:has(.cita__tarjeta--volteada) {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .cita__imagen img {
+    transition: none;
+  }
+
+.cita__tarjeta--volteada .cita__imagen {
+  animation: none;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+}
+
+.cita__volver {
+  position: fixed;
+  z-index: 10;
+  left: 50%;
+bottom: max(env(safe-area-inset-bottom, 0px), 0.25rem);  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: translateX(-50%);
+}
+
+.cita__volver img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cita__volver:focus-visible {
+  outline: 2px dashed currentColor;
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
+.cita__no--escapa {
+  position: absolute;
+  z-index: 5;
+  transition: left 180ms ease, top 180ms ease;
+}
+
+.cita__triste {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 18%);
+  font-size: clamp(7rem, 30vw, 14rem);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.cita__triste--visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+@keyframes confeti-flotante {
+  0% {
+    opacity: 0;
+    transform: translateY(0) rotate(0deg) scale(0.6);
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-75vh) rotate(360deg) scale(1.15);
+  }
 }
 </style>
