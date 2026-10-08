@@ -64,7 +64,7 @@ export const dias = [
   titulo: "Una carta y una canción",
   bloques: [
     { tipo: "mensaje", contenido: "Hay una infinidad de canciones que me recuerdan a ti, no sé si es porque estas en mi cabeza 24/7 y veo partes de ti en todo, o porque estoy muy enamorado:P pero todas son especiales..." },
-    { tipo: "carta", frente: "y esta es una de ellas >volteamebro<", reverso: "Estoy muy orgulloso de ti y de lo que estas logrando amor, estar a tu lado me da paz y quiero que asi sea toda mi vida, hoy nomas quiero recordarte que puedes apoyarte en mi siempre que lo necesites, no te exijas demasiado, 'la presion es un privilegio' pero el descanso tambien es importante, te amo infinitamente💓" },
+    { tipo: "carta", frente: "y esta es una de ellas >volteameamol<", reverso: "Estoy muy orgulloso de ti y de lo que estas logrando amor, estar a tu lado me da paz y quiero que asi sea toda mi vida, hoy nomas quiero recordarte que puedes apoyarte en mi siempre que lo necesites, no te exijas demasiado, 'la presion es un privilegio' pero el descanso tambien es importante, te amo infinitamente💓" },
     { tipo: "audio", archivo: "/audio/tearheart.mp3", titulo: "aña" },
   ],
 },
@@ -75,7 +75,7 @@ export const dias = [
     { tipo: "mensaje", contenido: "Hoy toca vale de nuevo C:" },
     { tipo: "ticket", frente: "Adivina de que...", contenido: "UN BESOTE MIO 😽" },
         { tipo: "mensaje", contenido: "segundointento \n Amor mio, quieres saber más sobre la cita que he planeado para tú cumpleaños?👀 " },
-      { tipo: "ticket", frente: "Rasga aqui", contenido: "El 12 vas a necesitar de algo para una de tus sorpresas...\n pero no te preocupes, yo lo tengo :P \n puedes recogerlo cuando quieras\n Ah si, para revelar algo más, toca tu mini-me jeje" },
+      { tipo: "ticket", frente: "Rómpeme", contenido: "El 12 vas a necesitar de algo para una de tus sorpresas...\n pero no te preocupes, yo lo tengo :P \n puedes recogerlo cuando quieras\n Ah si, para revelar algo más, toca tu mini-me jeje" },
        { tipo: "audio", archivo: "/audio/mariposas.mp3", titulo: "<3" },
 
     ],
