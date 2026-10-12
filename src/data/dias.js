@@ -119,13 +119,13 @@ export const dias = [
 }, 
 {
   numero: 12,
-  titulo: "Happy Hunger games, meu amor!!",
+  titulo: "FELIZ CUMPLEAÑOS, meu amor!!💕",
   bloques: [
     {
       tipo: "recorrido-cumple",
       datos: {
         carta: {
-          frente: "Hoy no hay un regalo",
+          frente: "Llegaste al final \n Hoy no hay un regalo",
           reverso: "Hay varios pero no te voy a decir cuales :P \n  Tú lo tendrás que descubrir..."
         },
 
