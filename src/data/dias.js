@@ -129,7 +129,7 @@ export const dias = [
           reverso: "Hay varios pero no te voy a decir cuales :P \n  Tú lo tendrás que descubrir..."
         },
 
-        // Completa estos textos cuando los tengas.
+        
         invitacion: "Te invito a un recorrido especial por tu cumpleaños, como primer destino me gustaría invitarte a mi humilde morada, hay una sorpresita esperandote 💕",
         pistaDos: "Preparé algo para ti, tiene un poquito de azúcar👀, bastante cariño💕 y un diseño algo exotico, espero que te guste y si no, que valores el intento (ಥ _ ಥ) teamo",
 
@@ -137,15 +137,15 @@ export const dias = [
        
           {
             respuesta: "FLORES",
-            adivinanza: "No tengo voz, pero puedo decir “te quiero”.\nNo duran para siempre, pero cuando llegan suelen alegrar el día.\nAlgunas tienen espinas y otras huelen demasiado bien.\n¿Qué palabra buscas?"
+            adivinanza: "No tengo voz, pero puedo decir “te quiero”.\nNo duran para siempre, pero cuando llegan suelen alegrar el día.\nAlgunas tienen espinas y otras huelen muy bien.\n¿Qué palabra buscas?"
           },
           {
             respuesta: "CAPIBARA",
-            adivinanza: "Soy grande, tranquilo y me llevo bien con casi todos.\nNo necesito correr para caerle bien a nadie.\nSi me ves relajado, probablemente estoy haciendo exactamente lo que quiero.\n¿Quién soy?"
+            adivinanza: "Soy goldito, tranquilo y me llevo bien con casi todos.\nNo necesito correr para caerle bien a nadie.\nSi me ves relajado, probablemente estoy haciendo exactamente lo que quiero.\n¿Quién soy?"
           },
           {
             respuesta: "MINI",
-            adivinanza: "Puedo ser una casa, una comida o cualquier cosa que imagines,\npero en un tamaño mucho más pequeño.\nSoy pequeña, aunque hacerme puede tomar bastante tiempo. (para ti, lo dudo)\n¿Qué palabra me describe?"
+            adivinanza: "Puedo ser una cosa, una comida o lo que sea que imagines,\npero en un tamaño mucho más pequeño.\n hacerme puede requerir mucha paciencia.\n¿Qué palabra me describe?"
           },
           {
             respuesta: "MONO",
@@ -155,10 +155,7 @@ export const dias = [
             respuesta: "LUZ",
             adivinanza: "No puedes agarrarme con las manos,\npero puedo hacer que todo se vea diferente.\nAparezco cuando hay oscuridad y desaparezco cuando ya no me necesitas.\n¿Qué soy?"
           },
-          {
-            respuesta: "HECHO A MANO",
-            adivinanza: "No salí de una fábrica\ny probablemente tampoco de una tienda.\nAlguien tuvo que dedicar tiempo, paciencia\ny un poquito de fe para hacerme. 😂\n¿Qué palabra o frase buscas?"
-          },
+
           {
             respuesta: "ARENA",
             adivinanza: "En este lugar no quieres terminar.\nAquí competir significa sobrevivir\ny tener suerte puede ser más importante que ser fuerte.\n¿Qué palabra buscas?"
@@ -168,8 +165,8 @@ export const dias = [
             adivinanza: "Llega una vez al año\ny puede decidir quién tendrá que irse\naunque nadie quiera hacerlo.\nEn cierto lugar, puede ser bastante más aterradora de lo normal.\n¿Qué palabra buscas?"
           },
           {
-            respuesta: "ABRAZO",
-            adivinanza: "No cuesta dinero,\nno necesitas comprarlo\ny puede hacer que un día malo se sienta un poquito mejor.\nPara hacerlo solo hacen falta dos personas… normalmente.\n¿Qué palabra buscas?"
+            respuesta: "PICANTE",
+            adivinanza: "No soy agua caliente pero hago arder tu paladar,\n en ninguna comida puedo faltar.\n un gusto compartido que nunca te va a fallar.s \n¿Qué palabra buscas?"
           },
           {
             respuesta: "DIENTE",
@@ -177,11 +174,11 @@ export const dias = [
           },
           {
             respuesta: "CELULAR",
-            adivinanza: "Probablemente estás leyendo esto gracias a mí.\nMe llevas contigo prácticamente a todas partes\ny cuando desaparezco durante cinco minutos, empieza el pánico. 😂\n¿Qué palabra buscas?"
+            adivinanza: "Probablemente estás leyendo esto gracias a mí.\nMe llevas contigo prácticamente a todas partes\ny cuando desaparezco durante cinco minutos, empieza el pánico. \n¿Qué palabra buscas?"
           },
           {
             respuesta: "RECUERDO",
-            adivinanza: "No puedo volver a vivir un momento,\npero puedo hacer que vuelvas a pensar en él.\nA veces está en una foto, una canción o una pequeña cosa guardada.\n¿Qué palabra buscas?"
+            adivinanza: "No necesito tierra ni riego,\n Sigo a una estrella dorada sin moverme del lugar.\n y en pequeñas piezas me vas a transformar.\n¿Qué palabra buscas?"
           }
         ]
       }
